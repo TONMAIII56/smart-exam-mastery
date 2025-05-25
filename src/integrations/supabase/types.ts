@@ -9,7 +9,337 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      exam_attempts: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          device_info: string | null
+          end_time: string | null
+          exam_id: string
+          id: string
+          ip_address: unknown | null
+          pass_status: Database["public"]["Enums"]["pass_status"] | null
+          percentage: number | null
+          score: number | null
+          start_time: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          device_info?: string | null
+          end_time?: string | null
+          exam_id: string
+          id?: string
+          ip_address?: unknown | null
+          pass_status?: Database["public"]["Enums"]["pass_status"] | null
+          percentage?: number | null
+          score?: number | null
+          start_time?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          device_info?: string | null
+          end_time?: string | null
+          exam_id?: string
+          id?: string
+          ip_address?: unknown | null
+          pass_status?: Database["public"]["Enums"]["pass_status"] | null
+          percentage?: number | null
+          score?: number | null
+          start_time?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          difficulty_level:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          exam_name: string
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id: string
+          is_active: boolean | null
+          passing_score: number | null
+          subject: Database["public"]["Enums"]["subject_type"]
+          time_limit: number | null
+          total_questions: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          exam_name: string
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id?: string
+          is_active?: boolean | null
+          passing_score?: number | null
+          subject: Database["public"]["Enums"]["subject_type"]
+          time_limit?: number | null
+          total_questions?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          exam_name?: string
+          exam_type?: Database["public"]["Enums"]["exam_type"]
+          id?: string
+          is_active?: boolean | null
+          passing_score?: number | null
+          subject?: Database["public"]["Enums"]["subject_type"]
+          time_limit?: number | null
+          total_questions?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          expiry_date: string | null
+          id: string
+          is_read: boolean | null
+          notification_text: string
+          notification_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_read?: boolean | null
+          notification_text: string
+          notification_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_read?: boolean | null
+          notification_text?: string
+          notification_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      options: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_correct: boolean | null
+          option_image: string | null
+          option_text: string
+          question_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          option_image?: string | null
+          option_text: string
+          question_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          option_image?: string | null
+          option_text?: string
+          question_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          account_status: Database["public"]["Enums"]["account_status"] | null
+          age: number | null
+          created_at: string | null
+          education_level: string | null
+          first_name: string | null
+          gender: string | null
+          id: string
+          last_name: string | null
+          profile_image: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          target_exam: Database["public"]["Enums"]["exam_type"] | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
+          age?: number | null
+          created_at?: string | null
+          education_level?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id: string
+          last_name?: string | null
+          profile_image?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          target_exam?: Database["public"]["Enums"]["exam_type"] | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
+          age?: number | null
+          created_at?: string | null
+          education_level?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id?: string
+          last_name?: string | null
+          profile_image?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          target_exam?: Database["public"]["Enums"]["exam_type"] | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          difficulty_level:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          exam_id: string
+          explanation: string | null
+          id: string
+          question_image: string | null
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"] | null
+          score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          exam_id: string
+          explanation?: string | null
+          id?: string
+          question_image?: string | null
+          question_text: string
+          question_type?: Database["public"]["Enums"]["question_type"] | null
+          score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          exam_id?: string
+          explanation?: string | null
+          id?: string
+          question_image?: string | null
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["question_type"] | null
+          score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_answers: {
+        Row: {
+          answer_time: string | null
+          attempt_id: string
+          id: string
+          is_correct: boolean | null
+          question_id: string
+          selected_option_id: string | null
+          time_spent: number | null
+        }
+        Insert: {
+          answer_time?: string | null
+          attempt_id: string
+          id?: string
+          is_correct?: boolean | null
+          question_id: string
+          selected_option_id?: string | null
+          time_spent?: number | null
+        }
+        Update: {
+          answer_time?: string | null
+          attempt_id?: string
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string
+          selected_option_id?: string | null
+          time_spent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "exam_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +348,23 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      account_status: "active" | "inactive" | "suspended"
+      difficulty_level: "easy" | "medium" | "hard"
+      exam_type: "civil-service" | "toeic" | "aisa"
+      pass_status: "pass" | "fail"
+      question_type: "multiple_choice" | "true_false" | "fill_in_blank"
+      subject_type:
+        | "general-knowledge"
+        | "thai-language"
+        | "mathematics"
+        | "english"
+        | "listening"
+        | "reading"
+        | "grammar"
+        | "vocabulary"
+        | "science"
+        | "general"
+      user_role: "user" | "admin" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +479,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_status: ["active", "inactive", "suspended"],
+      difficulty_level: ["easy", "medium", "hard"],
+      exam_type: ["civil-service", "toeic", "aisa"],
+      pass_status: ["pass", "fail"],
+      question_type: ["multiple_choice", "true_false", "fill_in_blank"],
+      subject_type: [
+        "general-knowledge",
+        "thai-language",
+        "mathematics",
+        "english",
+        "listening",
+        "reading",
+        "grammar",
+        "vocabulary",
+        "science",
+        "general",
+      ],
+      user_role: ["user", "admin", "super_admin"],
+    },
   },
 } as const
