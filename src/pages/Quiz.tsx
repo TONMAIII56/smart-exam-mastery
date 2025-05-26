@@ -1,359 +1,307 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, AlertCircle, Check, X, SkipForward, ArrowRight, Flag } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RegisterPopup } from '@/components/auth/RegisterPopup';
+import { useAuth } from '@/components/auth/AuthProvider';
 
-interface Question {
-  id: string;
-  question: string;
-  choices: string[];
-  correctAnswer: number;
-  explanation: string;
-  subject: string;
-  difficulty: string;
-}
+// Mock quiz data
+const mockQuizData = {
+  'civil-service': {
+    'general-knowledge': {
+      title: 'ความรู้ทั่วไป',
+      questions: [
+        {
+          id: 1,
+          question: 'เมืองหลวงของประเทศไทยคือข้อใด?',
+          options: ['เชียงใหม่', 'กรุงเทพมหานคร', 'ขอนแก่น', 'หาดใหญ่'],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: 'แม่น้ำที่ยาวที่สุดในประเทศไทยคือข้อใด?',
+          options: ['แม่น้ำเจ้าพระยา', 'แม่น้ำมูล', 'แม่น้ำชี', 'แม่น้ำน่าน'],
+          correctAnswer: 0
+        },
+        {
+          id: 3,
+          question: 'ประเทศไทยมีกี่จังหวัด?',
+          options: ['75', '76', '77', '78'],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: 'สัญลักษณ์ประจำชาติไทยคือข้อใด?',
+          options: ['ดอกบัว', 'ดอกราชพฤกษ์', 'ดอกจิก', 'ดอกกุหลาบ'],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: 'ภูเขาที่สูงที่สุดในประเทศไทยคือข้อใด?',
+          options: ['ดอยอินทนนท์', 'ดอยผ้าห่มปก', 'ดอยหลวงเชียงดาว', 'ดอยสุเทพ'],
+          correctAnswer: 0
+        }
+      ]
+    }
+  }
+};
 
 const Quiz = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const examType = searchParams.get('exam') || 'civil-service';
   const subjectId = searchParams.get('subject') || 'general-knowledge';
-  const mode = searchParams.get('mode') || 'normal';
-
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<(number | null)[]>([]);
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [isAnswered, setIsAnswered] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(false);
+  
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [showPopup, setShowPopup] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
-  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
 
-  // Sample questions - in real app, this would come from API
-  const sampleQuestions: Question[] = [
-    {
-      id: '1',
-      question: 'ประเทศไทยมีพื้นที่กี่ตารางกิโลเมตร?',
-      choices: ['513,120', '510,890', '514,000', '512,500'],
-      correctAnswer: 0,
-      explanation: 'ประเทศไทยมีพื้นที่ทั้งหมด 513,120 ตารางกิโลเมตร เป็นอันดับที่ 50 ของโลก',
-      subject: 'ความรู้รอบตัว',
-      difficulty: 'ง่าย'
-    },
-    {
-      id: '2',
-      question: 'สินค้าออกเรือนแทรกซ์อะไร คือ สินค้าที่ได้รับยกเว้นภาษี?',
-      choices: ['สินค้าส่งออก', 'สินค้านำเข้า', 'สินค้าโรงงาน', 'สินค้าอุปโภค'],
-      correctAnswer: 0,
-      explanation: 'ดูแล็กซ์ คือ การยกเว้นภาษีสำหรับสินค้าส่งออก เพื่อเพิ่มความสามารถในการแข่งขันในตลาดต่างประเทศ',
-      subject: 'ความรู้รอบตัว',
-      difficulty: 'กลาง'
-    },
-    {
-      id: '3',
-      question: 'องค์กรใดเป็นผู้รับผิดชอบหลักในการกำกับดูแลตลาดทุนของไทย?',
-      choices: ['ธนาคารแห่งประเทศไทย', 'กรมสรรพากร', 'สำนักงาน ก.ล.ต.', 'กระทรวงการคลัง'],
-      correctAnswer: 2,
-      explanation: 'สำนักงานคณะกรรมการกำกับหลักทรัพย์และตลาดหลักทรัพย์ (ก.ล.ต.) เป็นหน่วยงานหลักในการกำกับดูแลตลาดทุน',
-      subject: 'ความรู้รอบตัว',
-      difficulty: 'กลาง'
-    }
-  ];
-
-  const [questions] = useState<Question[]>(sampleQuestions);
-  const currentQuestion = questions[currentQuestionIndex];
-
-  // Initialize answers array
+  const quizData = mockQuizData[examType as keyof typeof mockQuizData]?.[subjectId as keyof (typeof mockQuizData)[typeof examType]];
+  
   useEffect(() => {
-    setAnswers(new Array(questions.length).fill(null));
-  }, [questions.length]);
-
-  // Timer countdown
-  useEffect(() => {
-    if (timeLeft > 0 && !isAnswered) {
+    if (timeLeft > 0 && !quizCompleted) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !isAnswered) {
-      handleTimeUp();
+    } else if (timeLeft === 0 && !quizCompleted) {
+      handleFinishQuiz();
     }
-  }, [timeLeft, isAnswered]);
-
-  const handleTimeUp = () => {
-    setIsAnswered(true);
-    setShowExplanation(true);
-  };
+  }, [timeLeft, quizCompleted]);
 
   const handleAnswerSelect = (answerIndex: number) => {
-    if (isAnswered) return;
-    
-    setSelectedAnswer(answerIndex);
-    setIsAnswered(true);
-    setShowExplanation(true);
-    
-    // Update answers array
     const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = answerIndex;
+    newAnswers[currentQuestion] = answerIndex;
     setAnswers(newAnswers);
-    
-    // Update score
-    if (answerIndex === currentQuestion.correctAnswer) {
-      setScore(score + 1);
+  };
+
+  const handleNext = () => {
+    if (currentQuestion < quizData.questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
     }
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(null);
-      setIsAnswered(false);
-      setShowExplanation(false);
-      setTimeLeft(60);
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const calculateScore = () => {
+    let correctCount = 0;
+    quizData.questions.forEach((question, index) => {
+      if (answers[index] === question.correctAnswer) {
+        correctCount++;
+      }
+    });
+    return correctCount;
+  };
+
+  const handleFinishQuiz = () => {
+    const finalScore = calculateScore();
+    setScore(finalScore);
+    setQuizCompleted(true);
+    
+    // Store quiz results in session storage
+    sessionStorage.setItem('quizResults', JSON.stringify({
+      score: finalScore,
+      total: quizData.questions.length,
+      exam: examType,
+      subject: subjectId,
+      answers: answers,
+      questions: quizData.questions
+    }));
+    
+    // If user is already authenticated, go directly to results
+    if (user) {
+      navigate(`/quiz-results?score=${finalScore}&total=${quizData.questions.length}&exam=${examType}&subject=${subjectId}`);
     } else {
-      // Quiz completed
-      navigate(`/quiz-results?exam=${examType}&subject=${subjectId}&score=${score}&total=${questions.length}`);
+      // Show registration popup for non-authenticated users
+      setShowPopup(true);
     }
   };
 
-  const handleSkipQuestion = () => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = null;
-    setAnswers(newAnswers);
-    handleNextQuestion();
+  const handleRegisterSuccess = () => {
+    setShowPopup(false);
+    navigate(`/quiz-results?score=${score}&total=${quizData.questions.length}&exam=${examType}&subject=${subjectId}`);
   };
 
-  const toggleFlag = () => {
-    const newFlagged = new Set(flaggedQuestions);
-    if (newFlagged.has(currentQuestionIndex)) {
-      newFlagged.delete(currentQuestionIndex);
-    } else {
-      newFlagged.add(currentQuestionIndex);
-    }
-    setFlaggedQuestions(newFlagged);
+  const handleCancelPopup = () => {
+    setShowPopup(false);
+    navigate('/');
   };
 
-  const getChoiceStyle = (index: number) => {
-    if (!showExplanation) {
-      return selectedAnswer === index 
-        ? 'border-yellow-500 bg-yellow-50' 
-        : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-50';
-    }
-    
-    if (index === currentQuestion.correctAnswer) {
-      return 'border-green-500 bg-green-50 text-green-800';
-    }
-    
-    if (selectedAnswer === index && index !== currentQuestion.correctAnswer) {
-      return 'border-red-500 bg-red-50 text-red-800';
-    }
-    
-    return 'border-gray-200 bg-gray-50';
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getChoiceIcon = (index: number) => {
-    if (!showExplanation) return null;
-    
-    if (index === currentQuestion.correctAnswer) {
-      return <Check className="h-5 w-5 text-green-600" />;
-    }
-    
-    if (selectedAnswer === index && index !== currentQuestion.correctAnswer) {
-      return <X className="h-5 w-5 text-red-600" />;
-    }
-    
-    return null;
-  };
+  const progress = ((currentQuestion + 1) / quizData.questions.length) * 100;
+  const currentQ = quizData.questions[currentQuestion];
 
-  const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
+  if (!quizData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">ไม่พบข้อสอบ</h1>
+          <Button onClick={() => navigate('/quiz-selection')}>
+            กลับไปเลือกข้อสอบ
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (quizCompleted && !user) {
+    return (
+      <>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-2xl">
+            <CardContent className="p-8 text-center">
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">ทำแบบทดสอบเสร็จสิ้น!</h1>
+              <p className="text-xl text-gray-600 mb-6">
+                คุณได้ <span className="font-bold text-orange-600">{score}/{quizData.questions.length}</span> คะแนน
+              </p>
+              <p className="text-gray-500">
+                กรุณาลงทะเบียนเพื่อดูผลการสอบโดยละเอียดและเฉลย
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <RegisterPopup
+          score={score}
+          totalQuestions={quizData.questions.length}
+          onRegisterSuccess={handleRegisterSuccess}
+          onCancel={handleCancelPopup}
+          isOpen={showPopup}
+        />
+      </>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
-      {/* Header */}
-      <header className="bg-yellow-400 shadow-lg">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="text-white hover:bg-yellow-500"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div>
-                <h1 className="text-lg font-bold text-white">
-                  {currentQuestion?.subject} - ข้อที่ {currentQuestionIndex + 1}
-                </h1>
-                <div className="flex items-center space-x-4 text-yellow-100 text-sm">
-                  <span>คะแนน: {score}/{questions.length}</span>
-                  <span>•</span>
-                  <span>เหลือ {questions.length - currentQuestionIndex - 1} ข้อ</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-right text-white">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span className={`font-bold ${timeLeft <= 10 ? 'text-red-200' : ''}`}>
-                    {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                  </span>
-                </div>
-              </div>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleFlag}
-                className={`text-white hover:bg-yellow-500 ${
-                  flaggedQuestions.has(currentQuestionIndex) ? 'bg-yellow-600' : ''
-                }`}
-              >
-                <Flag className="h-4 w-4" />
-              </Button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-800">{quizData.title}</h1>
+            <div className="flex items-center space-x-2 text-orange-600">
+              <Clock className="h-5 w-5" />
+              <span className="font-mono text-lg font-semibold">{formatTime(timeLeft)}</span>
             </div>
           </div>
           
-          <div className="mt-3">
-            <Progress value={progressPercentage} className="h-2 bg-yellow-300" />
-          </div>
+          <Progress value={progress} className="h-3" />
+          <p className="text-sm text-gray-500 mt-2">
+            ข้อ {currentQuestion + 1} จาก {quizData.questions.length}
+          </p>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Question Card */}
-        <Card className="mb-6">
-          <CardContent className="p-8">
-            <div className="flex items-start justify-between mb-6">
-              <Badge variant="outline" className="text-sm">
-                {currentQuestion?.difficulty}
-              </Badge>
-              <div className="text-sm text-gray-500">
-                ข้อ {currentQuestionIndex + 1} จาก {questions.length}
-              </div>
-            </div>
-            
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-8 leading-relaxed">
-              {currentQuestion?.question}
-            </h2>
-            
-            <div className="space-y-4">
-              {currentQuestion?.choices.map((choice, index) => (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-xl">
+              {currentQ.question}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {currentQ.options.map((option, index) => (
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
-                  disabled={isAnswered}
-                  className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 flex items-center justify-between ${getChoiceStyle(index)}`}
+                  className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
+                    answers[currentQuestion] === index
+                      ? 'border-orange-500 bg-orange-50 text-orange-800'
+                      : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                  }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center font-semibold text-gray-600">
-                      {String.fromCharCode(65 + index)}
-                    </div>
-                    <span className="text-gray-800">{choice}</span>
-                  </div>
-                  {getChoiceIcon(index)}
+                  <span className="font-medium mr-3">
+                    {String.fromCharCode(65 + index)}.
+                  </span>
+                  {option}
                 </button>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Explanation */}
-        {showExplanation && (
-          <Card className="mb-6 border-blue-200 bg-blue-50">
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-blue-800 mb-2">คำอธิบาย</h3>
-                  <p className="text-blue-700">{currentQuestion?.explanation}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Action Buttons */}
+        {/* Navigation */}
         <div className="flex justify-between items-center">
-          <div className="flex space-x-2">
-            {!isAnswered && (
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentQuestion === 0}
+            className="flex items-center space-x-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>ข้อก่อนหน้า</span>
+          </Button>
+
+          <div className="flex space-x-4">
+            {currentQuestion === quizData.questions.length - 1 ? (
               <Button
-                variant="outline"
-                onClick={handleSkipQuestion}
-                className="flex items-center space-x-2"
+                onClick={handleFinishQuiz}
+                className="bg-green-600 hover:bg-green-700 text-white px-8"
+                disabled={answers[currentQuestion] === undefined}
               >
-                <SkipForward className="h-4 w-4" />
-                <span>ข้าม</span>
+                ส่งคำตอบ
               </Button>
-            )}
-          </div>
-          
-          <div className="flex space-x-2">
-            {isAnswered && (
+            ) : (
               <Button
-                onClick={handleNextQuestion}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white flex items-center space-x-2 px-6"
+                onClick={handleNext}
+                disabled={answers[currentQuestion] === undefined}
+                className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600"
               >
-                <span>
-                  {currentQuestionIndex < questions.length - 1 ? 'ข้อถัดไป' : 'ดูผลคะแนน'}
-                </span>
-                <ArrowRight className="h-4 w-4" />
+                <span>ข้อต่อไป</span>
+                <ChevronRight className="h-4 w-4" />
               </Button>
             )}
           </div>
         </div>
 
-        {/* Question Navigation */}
-        <Card className="mt-6">
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">ภาพรวมข้อสอบ</h3>
-            <div className="grid grid-cols-10 gap-2">
-              {questions.map((_, index) => (
+        {/* Question Overview */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-lg">ภาพรวมการตอบ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+              {quizData.questions.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => {
-                    setCurrentQuestionIndex(index);
-                    setSelectedAnswer(answers[index]);
-                    setIsAnswered(answers[index] !== null);
-                    setShowExplanation(answers[index] !== null);
-                    setTimeLeft(60);
-                  }}
-                  className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
-                    index === currentQuestionIndex
-                      ? 'bg-yellow-500 text-white'
-                      : answers[index] !== null
-                      ? 'bg-green-100 text-green-800'
-                      : flaggedQuestions.has(index)
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  onClick={() => setCurrentQuestion(index)}
+                  className={`aspect-square rounded-lg border-2 text-sm font-medium transition-all ${
+                    index === currentQuestion
+                      ? 'border-orange-500 bg-orange-500 text-white'
+                      : answers[index] !== undefined
+                      ? 'border-green-500 bg-green-500 text-white'
+                      : 'border-gray-300 bg-white text-gray-600 hover:border-orange-300'
                   }`}
                 >
                   {index + 1}
                 </button>
               ))}
             </div>
-            <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 mt-3">
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                <span>ข้อปัจจุบัน</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                <span>ตอบแล้ว</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
-                <span>ทำเครื่องหมาย</span>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
+
+      <RegisterPopup
+        score={score}
+        totalQuestions={quizData.questions.length}
+        onRegisterSuccess={handleRegisterSuccess}
+        onCancel={handleCancelPopup}
+        isOpen={showPopup}
+      />
     </div>
   );
 };
