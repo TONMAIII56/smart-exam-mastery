@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,29 @@ import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RegisterPopup } from '@/components/auth/RegisterPopup';
 import { useAuth } from '@/components/auth/AuthProvider';
 
-// Mock quiz data
-const mockQuizData = {
+// Define types for quiz data structure
+interface Question {
+  id: number;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
+interface Subject {
+  title: string;
+  questions: Question[];
+}
+
+interface ExamData {
+  [subjectId: string]: Subject;
+}
+
+interface MockQuizData {
+  [examType: string]: ExamData;
+}
+
+// Mock quiz data with proper typing
+const mockQuizData: MockQuizData = {
   'civil-service': {
     'general-knowledge': {
       title: 'ความรู้ทั่วไป',
@@ -64,7 +84,8 @@ const Quiz = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
 
-  const quizData = mockQuizData[examType as keyof typeof mockQuizData]?.[subjectId as keyof (typeof mockQuizData)[typeof examType]];
+  // Safe access to quiz data with type checking
+  const quizData = mockQuizData[examType]?.[subjectId];
   
   useEffect(() => {
     if (timeLeft > 0 && !quizCompleted) {
