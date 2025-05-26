@@ -7,33 +7,44 @@ export const Features: React.FC = () => {
     {
       icon: ClipboardCheck,
       title: 'แบบทดสอบเสมือนจริง',
-      description: 'จำลองบรรยากาศการสอบจริงด้วยระบบจับเวลาและรูปแบบข้อสอบที่เหมือนข้อสอบจริง'
+      description: 'จำลองบรรยากาศการสอบจริงด้วยระบบจับเวลาและรูปแบบข้อสอบที่เหมือนข้อสอบจริง',
+      gradient: 'from-orange-500 to-red-500',
+      bgGradient: 'from-orange-50 to-red-50'
     },
     {
       icon: BookOpen,
       title: 'ครอบคลุมทุกวิชาสอบ',
-      description: 'ข้อสอบครบทุกวิชาสำคัญ ภาษาอังกฤษ คณิตศาสตร์ ภาษาไทย และการเมืองการปกครอง'
+      description: 'ข้อสอบครบทุกวิชาสำคัญ ภาษาอังกฤษ คณิตศาสตร์ ภาษาไทย และการเมืองการปกครอง',
+      gradient: 'from-blue-500 to-indigo-500',
+      bgGradient: 'from-blue-50 to-indigo-50'
     },
     {
       icon: BarChart3,
       title: 'การวิเคราะห์จุดแข็ง-จุดอ่อน',
-      description: 'รับรายงานการวิเคราะห์ผลการทำข้อสอบแบบละเอียด พร้อมคำแนะนำในการปรับปรุง'
+      description: 'รับรายงานการวิเคราะห์ผลการทำข้อสอบแบบละเอียด พร้อมคำแนะนำในการปรับปรุง',
+      gradient: 'from-green-500 to-emerald-500',
+      bgGradient: 'from-green-50 to-emerald-50'
     },
     {
       icon: Target,
       title: 'เฉลยละเอียดพร้อมคำอธิบาย',
-      description: 'เฉลยข้อสอบครบทุกข้อพร้อมคำอธิบายที่ช่วยให้เข้าใจเนื้อหาได้ลึกซึ้งยิ่งขึ้น'
+      description: 'เฉลยข้อสอบครบทุกข้อพร้อมคำอธิบายที่ช่วยให้เข้าใจเนื้อหาได้ลึกซึ้งยิ่งขึ้น',
+      gradient: 'from-purple-500 to-pink-500',
+      bgGradient: 'from-purple-50 to-pink-50'
     }
   ];
 
   return (
-    <section id="features" className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            ทำไมต้อง Smart Exam Mastery
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            ทำไมต้อง
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500 ml-3">
+              Smart Exam Mastery
+            </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
             แพลตฟอร์มที่ออกแบบมาเพื่อช่วยให้คุณเตรียมความพร้อมสำหรับการสอบข้าราชการได้อย่างมีประสิทธิภาพ
           </p>
         </div>
@@ -44,17 +55,22 @@ export const Features: React.FC = () => {
             return (
               <div 
                 key={index}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 border border-gray-100"
+                className={`group relative bg-gradient-to-br ${feature.bgGradient} p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/50 cursor-pointer transform hover:-translate-y-2`}
               >
-                <div className="text-indigo-600 mb-4">
-                  <IconComponent size={48} />
+                <div className="relative z-10">
+                  <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.gradient} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent size={32} className="text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-4 text-gray-900 group-hover:text-gray-800">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
+                
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
               </div>
             );
           })}
