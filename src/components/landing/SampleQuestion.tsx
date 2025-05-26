@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
 export const SampleQuestion: React.FC = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [showResult, setShowResult] = useState(false);
+  const navigate = useNavigate();
 
   const sampleQuestion = {
     subject: 'ภาษาไทย',
@@ -26,7 +28,7 @@ export const SampleQuestion: React.FC = () => {
   };
 
   const startFullPreTest = () => {
-    console.log('Navigate to full pre-test');
+    navigate('/quiz-selection');
   };
 
   return (

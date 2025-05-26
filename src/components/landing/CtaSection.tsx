@@ -2,10 +2,17 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Clock, Gift } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const CtaSection: React.FC = () => {
+  const navigate = useNavigate();
+
   const startPreTest = () => {
-    console.log('Navigate to pre-test');
+    navigate('/quiz-selection');
+  };
+
+  const viewMoreInfo = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -44,6 +51,7 @@ export const CtaSection: React.FC = () => {
             เริ่มทำแบบทดสอบฟรี
           </Button>
           <Button 
+            onClick={viewMoreInfo}
             variant="outline"
             size="lg"
             className="border-2 border-white text-white hover:bg-white hover:text-orange-600 py-4 px-10 rounded-xl font-semibold text-lg transition-all duration-300"

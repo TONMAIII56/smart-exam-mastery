@@ -4,9 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { BookOpen, Target, Trophy, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+
   const { data: exams } = useQuery({
     queryKey: ['exams'],
     queryFn: async () => {
@@ -44,6 +47,14 @@ export const Dashboard: React.FC = () => {
       'general': 'ทั่วไป',
     };
     return subjectMap[subject] || subject;
+  };
+
+  const startExam = (examId?: string) => {
+    if (examId) {
+      navigate(`/quiz?examId=${examId}`);
+    } else {
+      navigate('/quiz-selection');
+    }
   };
 
   return (
@@ -118,13 +129,14 @@ export const Dashboard: React.FC = () => {
                     {exam.total_questions} ข้อ • {exam.time_limit} นาที
                   </p>
                 </div>
-                <Button>เริ่มทำข้อสอบ</Button>
+                <Button onClick={() => startExam(exam.id)}>เริ่มทำข้อสอบ</Button>
               </div>
             ))}
             {(!exams || exams.length === 0) && (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">ยังไม่มีข้อสอบในระบบ</p>
-                <p className="text-sm text-gray-400">ระบบจะเพิ่มข้อสอบในเร็วๆ นี้</p>
+                <p className="text-sm text-gray-400 mb-4">ระบบจะเพิ่มข้อสอบในเร็วๆ นี้</p>
+                <Button onClick={() => startExam()}>ทดลองทำข้อสอบตัวอย่าง</Button>
               </div>
             )}
           </div>

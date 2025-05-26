@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const LandingNavbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -19,7 +21,11 @@ export const LandingNavbar: React.FC = () => {
   };
 
   const startPreTest = () => {
-    console.log('Navigate to pre-test');
+    navigate('/quiz-selection');
+  };
+
+  const goToDashboard = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -62,7 +68,7 @@ export const LandingNavbar: React.FC = () => {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="outline" 
-                onClick={startPreTest}
+                onClick={goToDashboard}
                 className="border-orange-500 text-orange-500 hover:bg-orange-50 rounded-lg"
               >
                 เข้าสู่ระบบ
@@ -120,7 +126,7 @@ export const LandingNavbar: React.FC = () => {
                 <Button 
                   variant="outline" 
                   className="w-full border-orange-500 text-orange-500 hover:bg-orange-50 rounded-lg" 
-                  onClick={startPreTest}
+                  onClick={goToDashboard}
                 >
                   เข้าสู่ระบบ
                 </Button>

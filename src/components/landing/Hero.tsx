@@ -2,10 +2,17 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowDown, Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const Hero: React.FC = () => {
+  const navigate = useNavigate();
+
   const startPreTest = () => {
-    console.log('Navigate to pre-test');
+    navigate('/quiz-selection');
+  };
+
+  const viewSampleQuiz = () => {
+    navigate('/quiz');
   };
 
   return (
@@ -41,6 +48,7 @@ export const Hero: React.FC = () => {
                 เริ่มทำแบบทดสอบฟรี
               </Button>
               <Button 
+                onClick={viewSampleQuiz}
                 variant="outline"
                 size="lg"
                 className="border-2 border-orange-500 text-orange-500 hover:bg-orange-50 py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300"
