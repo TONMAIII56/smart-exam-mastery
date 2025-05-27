@@ -6,6 +6,9 @@ import { Progress } from '@/components/ui/progress';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RegisterPopup } from '@/components/auth/RegisterPopup';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { QuotaChecker } from '@/components/subscription/QuotaChecker';
+import { useSubscription } from '@/hooks/useSubscription';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define types for quiz data structure
 interface Question {
@@ -73,6 +76,7 @@ const Quiz = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { updateUsage } = useSubscription();
   
   const examType = searchParams.get('exam') || 'civil-service';
   const subjectId = searchParams.get('subject') || 'general-knowledge';
@@ -124,12 +128,57 @@ const Quiz = () => {
     return correctCount;
   };
 
-  const handleFinishQuiz = () => {
+  const saveQuizResults = async (finalScore: number) => {
+    if (!user) return;
+
+    try {
+      // Update usage tracking
+      await updateUsage({ examType, subject: subjectId });
+
+      // Save exam results
+      const { data: examResult, error: resultError } = await supabase
+        .from('exam_results')
+        .insert({
+          user_id: user.id,
+          exam_type: examType,
+          subject: subjectId,
+          score: finalScore,
+          total_questions: quizData.questions.length,
+          percentage: (finalScore / quizData.questions.length) * 100,
+          time_taken: 300 - timeLeft, // time spent
+        })
+        .select()
+        .single();
+
+      if (resultError) throw resultError;
+
+      // Save user answers
+      const userAnswersData = quizData.questions.map((question, index) => ({
+        result_id: examResult.id,
+        question_id: question.id,
+        selected_answer: answers[index] || null,
+        correct_answer: question.correctAnswer,
+        is_correct: answers[index] === question.correctAnswer,
+      }));
+
+      const { error: answersError } = await supabase
+        .from('user_answers')
+        .insert(userAnswersData);
+
+      if (answersError) throw answersError;
+
+      console.log('Quiz results saved successfully');
+    } catch (error) {
+      console.error('Error saving quiz results:', error);
+    }
+  };
+
+  const handleFinishQuiz = async () => {
     const finalScore = calculateScore();
     setScore(finalScore);
     setQuizCompleted(true);
     
-    // Store quiz results in session storage
+    // Store quiz results in session storage for fallback
     sessionStorage.setItem('quizResults', JSON.stringify({
       score: finalScore,
       total: quizData.questions.length,
@@ -138,9 +187,10 @@ const Quiz = () => {
       answers: answers,
       questions: quizData.questions
     }));
-    
-    // If user is already authenticated, go directly to results
+
+    // Save to database if user is authenticated
     if (user) {
+      await saveQuizResults(finalScore);
       navigate(`/quiz-results?score=${finalScore}&total=${quizData.questions.length}&exam=${examType}&subject=${subjectId}`);
     } else {
       // Show registration popup for non-authenticated users
@@ -163,9 +213,6 @@ const Quiz = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const progress = ((currentQuestion + 1) / quizData.questions.length) * 100;
-  const currentQ = quizData.questions[currentQuestion];
 
   if (!quizData) {
     return (
@@ -207,123 +254,128 @@ const Quiz = () => {
     );
   }
 
+  const progress = ((currentQuestion + 1) / quizData.questions.length) * 100;
+  const currentQ = quizData.questions[currentQuestion];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">{quizData.title}</h1>
-            <div className="flex items-center space-x-2 text-orange-600">
-              <Clock className="h-5 w-5" />
-              <span className="font-mono text-lg font-semibold">{formatTime(timeLeft)}</span>
+    <QuotaChecker examType={examType} subject={subjectId}>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-bold text-gray-800">{quizData.title}</h1>
+              <div className="flex items-center space-x-2 text-orange-600">
+                <Clock className="h-5 w-5" />
+                <span className="font-mono text-lg font-semibold">{formatTime(timeLeft)}</span>
+              </div>
+            </div>
+            
+            <Progress value={progress} className="h-3" />
+            <p className="text-sm text-gray-500 mt-2">
+              ข้อ {currentQuestion + 1} จาก {quizData.questions.length}
+            </p>
+          </div>
+
+          {/* Question Card */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl">
+                {currentQ.question}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {currentQ.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
+                      answers[currentQuestion] === index
+                        ? 'border-orange-500 bg-orange-50 text-orange-800'
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                    }`}
+                  >
+                    <span className="font-medium mr-3">
+                      {String.fromCharCode(65 + index)}.
+                    </span>
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Navigation */}
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentQuestion === 0}
+              className="flex items-center space-x-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>ข้อก่อนหน้า</span>
+            </Button>
+
+            <div className="flex space-x-4">
+              {currentQuestion === quizData.questions.length - 1 ? (
+                <Button
+                  onClick={handleFinishQuiz}
+                  className="bg-green-600 hover:bg-green-700 text-white px-8"
+                  disabled={answers[currentQuestion] === undefined}
+                >
+                  ส่งคำตอบ
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleNext}
+                  disabled={answers[currentQuestion] === undefined}
+                  className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600"
+                >
+                  <span>ข้อต่อไป</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
-          
-          <Progress value={progress} className="h-3" />
-          <p className="text-sm text-gray-500 mt-2">
-            ข้อ {currentQuestion + 1} จาก {quizData.questions.length}
-          </p>
+
+          {/* Question Overview */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-lg">ภาพรวมการตอบ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                {quizData.questions.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentQuestion(index)}
+                    className={`aspect-square rounded-lg border-2 text-sm font-medium transition-all ${
+                      index === currentQuestion
+                        ? 'border-orange-500 bg-orange-500 text-white'
+                        : answers[index] !== undefined
+                        ? 'border-green-500 bg-green-500 text-white'
+                        : 'border-gray-300 bg-white text-gray-600 hover:border-orange-300'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Question Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-xl">
-              {currentQ.question}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {currentQ.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleAnswerSelect(index)}
-                  className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
-                    answers[currentQuestion] === index
-                      ? 'border-orange-500 bg-orange-50 text-orange-800'
-                      : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
-                  }`}
-                >
-                  <span className="font-medium mr-3">
-                    {String.fromCharCode(65 + index)}.
-                  </span>
-                  {option}
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentQuestion === 0}
-            className="flex items-center space-x-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span>ข้อก่อนหน้า</span>
-          </Button>
-
-          <div className="flex space-x-4">
-            {currentQuestion === quizData.questions.length - 1 ? (
-              <Button
-                onClick={handleFinishQuiz}
-                className="bg-green-600 hover:bg-green-700 text-white px-8"
-                disabled={answers[currentQuestion] === undefined}
-              >
-                ส่งคำตอบ
-              </Button>
-            ) : (
-              <Button
-                onClick={handleNext}
-                disabled={answers[currentQuestion] === undefined}
-                className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600"
-              >
-                <span>ข้อต่อไป</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Question Overview */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-lg">ภาพรวมการตอบ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-              {quizData.questions.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentQuestion(index)}
-                  className={`aspect-square rounded-lg border-2 text-sm font-medium transition-all ${
-                    index === currentQuestion
-                      ? 'border-orange-500 bg-orange-500 text-white'
-                      : answers[index] !== undefined
-                      ? 'border-green-500 bg-green-500 text-white'
-                      : 'border-gray-300 bg-white text-gray-600 hover:border-orange-300'
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <RegisterPopup
+          score={score}
+          totalQuestions={quizData.questions.length}
+          onRegisterSuccess={handleRegisterSuccess}
+          onCancel={handleCancelPopup}
+          isOpen={showPopup}
+        />
       </div>
-
-      <RegisterPopup
-        score={score}
-        totalQuestions={quizData.questions.length}
-        onRegisterSuccess={handleRegisterSuccess}
-        onCancel={handleCancelPopup}
-        isOpen={showPopup}
-      />
-    </div>
+    </QuotaChecker>
   );
 };
 

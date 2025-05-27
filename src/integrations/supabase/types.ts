@@ -62,6 +62,53 @@ export type Database = {
           },
         ]
       }
+      exam_results: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          exam_type: string
+          id: string
+          percentage: number
+          score: number
+          subject: string
+          time_taken: number | null
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          exam_type: string
+          id?: string
+          percentage: number
+          score: number
+          subject: string
+          time_taken?: number | null
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          exam_type?: string
+          id?: string
+          percentage?: number
+          score?: number
+          subject?: string
+          time_taken?: number | null
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_results_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           created_at: string | null
@@ -196,6 +243,13 @@ export type Database = {
           last_name: string | null
           profile_image: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          subscription_end_date: string | null
+          subscription_plan:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          subscription_status:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
           target_exam: Database["public"]["Enums"]["exam_type"] | null
           updated_at: string | null
           username: string | null
@@ -211,6 +265,13 @@ export type Database = {
           last_name?: string | null
           profile_image?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          subscription_end_date?: string | null
+          subscription_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
           target_exam?: Database["public"]["Enums"]["exam_type"] | null
           updated_at?: string | null
           username?: string | null
@@ -226,6 +287,13 @@ export type Database = {
           last_name?: string | null
           profile_image?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          subscription_end_date?: string | null
+          subscription_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
           target_exam?: Database["public"]["Enums"]["exam_type"] | null
           updated_at?: string | null
           username?: string | null
@@ -288,6 +356,94 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_tracking: {
+        Row: {
+          created_at: string | null
+          exam_type: string
+          id: string
+          subject: string
+          updated_at: string | null
+          usage_count: number | null
+          usage_month: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          exam_type: string
+          id?: string
+          subject: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_month: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          exam_type?: string
+          id?: string
+          subject?: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_month?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_answers: {
         Row: {
           answer_time: string | null
@@ -295,6 +451,7 @@ export type Database = {
           id: string
           is_correct: boolean | null
           question_id: string
+          result_id: string | null
           selected_option_id: string | null
           time_spent: number | null
         }
@@ -304,6 +461,7 @@ export type Database = {
           id?: string
           is_correct?: boolean | null
           question_id: string
+          result_id?: string | null
           selected_option_id?: string | null
           time_spent?: number | null
         }
@@ -313,6 +471,7 @@ export type Database = {
           id?: string
           is_correct?: boolean | null
           question_id?: string
+          result_id?: string | null
           selected_option_id?: string | null
           time_spent?: number | null
         }
@@ -332,6 +491,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_answers_result_id_fkey"
+            columns: ["result_id"]
+            isOneToOne: false
+            referencedRelation: "exam_results"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_answers_selected_option_id_fkey"
             columns: ["selected_option_id"]
             isOneToOne: false
@@ -345,7 +511,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_exam_quota: {
+        Args: { p_user_id: string; p_exam_type: string; p_subject: string }
+        Returns: boolean
+      }
+      check_user_subscription: {
+        Args: { user_id: string }
+        Returns: {
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: Database["public"]["Enums"]["subscription_status"]
+          is_premium: boolean
+          expires_at: string
+        }[]
+      }
+      update_usage_tracking: {
+        Args: { p_user_id: string; p_exam_type: string; p_subject: string }
+        Returns: undefined
+      }
     }
     Enums: {
       account_status: "active" | "inactive" | "suspended"
@@ -364,6 +546,8 @@ export type Database = {
         | "vocabulary"
         | "science"
         | "general"
+      subscription_plan: "free" | "premium"
+      subscription_status: "active" | "inactive" | "cancelled" | "past_due"
       user_role: "user" | "admin" | "super_admin"
     }
     CompositeTypes: {
@@ -497,6 +681,8 @@ export const Constants = {
         "science",
         "general",
       ],
+      subscription_plan: ["free", "premium"],
+      subscription_status: ["active", "inactive", "cancelled", "past_due"],
       user_role: ["user", "admin", "super_admin"],
     },
   },
