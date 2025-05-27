@@ -1,379 +1,244 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
-import { RegisterPopup } from '@/components/auth/RegisterPopup';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { QuotaChecker } from '@/components/subscription/QuotaChecker';
-import { useSubscription } from '@/hooks/useSubscription';
+import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useSubscription } from '@/hooks/useSubscription';
+import { QuotaChecker } from '@/components/subscription/QuotaChecker';
+import { useToast } from '@/hooks/use-toast';
 
-// Define types for quiz data structure
 interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  correctAnswer: number;
+  id: string;
+  question_text: string;
+  options: Option[];
 }
 
-interface Subject {
-  title: string;
-  questions: Question[];
+interface Option {
+  id: string;
+  option_text: string;
+  is_correct: boolean;
 }
-
-interface ExamData {
-  [subjectId: string]: Subject;
-}
-
-interface MockQuizData {
-  [examType: string]: ExamData;
-}
-
-// Mock quiz data with proper typing
-const mockQuizData: MockQuizData = {
-  'civil-service': {
-    'general-knowledge': {
-      title: 'ความรู้ทั่วไป',
-      questions: [
-        {
-          id: 1,
-          question: 'เมืองหลวงของประเทศไทยคือข้อใด?',
-          options: ['เชียงใหม่', 'กรุงเทพมหานคร', 'ขอนแก่น', 'หาดใหญ่'],
-          correctAnswer: 1
-        },
-        {
-          id: 2,
-          question: 'แม่น้ำที่ยาวที่สุดในประเทศไทยคือข้อใด?',
-          options: ['แม่น้ำเจ้าพระยา', 'แม่น้ำมูล', 'แม่น้ำชี', 'แม่น้ำน่าน'],
-          correctAnswer: 0
-        },
-        {
-          id: 3,
-          question: 'ประเทศไทยมีกี่จังหวัด?',
-          options: ['75', '76', '77', '78'],
-          correctAnswer: 2
-        },
-        {
-          id: 4,
-          question: 'สัญลักษณ์ประจำชาติไทยคือข้อใด?',
-          options: ['ดอกบัว', 'ดอกราชพฤกษ์', 'ดอกจิก', 'ดอกกุหลาบ'],
-          correctAnswer: 1
-        },
-        {
-          id: 5,
-          question: 'ภูเขาที่สูงที่สุดในประเทศไทยคือข้อใด?',
-          options: ['ดอยอินทนนท์', 'ดอยผ้าห่มปก', 'ดอยหลวงเชียงดาว', 'ดอยสุเทพ'],
-          correctAnswer: 0
-        }
-      ]
-    }
-  }
-};
 
 const Quiz = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [startTime, setStartTime] = useState<Date | null>(null);
   const { user } = useAuth();
-  const { updateUsage } = useSubscription();
-  
-  const examType = searchParams.get('exam') || 'civil-service';
-  const subjectId = searchParams.get('subject') || 'general-knowledge';
-  
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
-  const [showPopup, setShowPopup] = useState(false);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [score, setScore] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { examType, subject } = location.state || { examType: '', subject: '' };
+  const { isPremium, updateUsage } = useSubscription();
+  const { toast } = useToast();
 
-  // Safe access to quiz data with type checking
-  const quizData = mockQuizData[examType]?.[subjectId];
-  
   useEffect(() => {
-    if (timeLeft > 0 && !quizCompleted) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !quizCompleted) {
-      handleFinishQuiz();
-    }
-  }, [timeLeft, quizCompleted]);
+    const fetchQuestions = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('exam_type', examType)
+          .eq('subject', subject);
 
-  const handleAnswerSelect = (answerIndex: number) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = answerIndex;
-    setAnswers(newAnswers);
-  };
-
-  const handleNext = () => {
-    if (currentQuestion < quizData.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
-  };
-
-  const calculateScore = () => {
-    let correctCount = 0;
-    quizData.questions.forEach((question, index) => {
-      if (answers[index] === question.correctAnswer) {
-        correctCount++;
+        if (error) {
+          console.error('Error fetching questions:', error);
+          toast({
+            title: 'เกิดข้อผิดพลาด',
+            description: 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง',
+            variant: 'destructive',
+          });
+        } else {
+          setQuestions(data || []);
+          setStartTime(new Date());
+        }
+      } finally {
+        setIsLoading(false);
       }
-    });
-    return correctCount;
+    };
+
+    fetchQuestions();
+  }, [examType, subject, toast]);
+
+  const handleAnswer = (optionId: string) => {
+    setAnswers(prevAnswers => ({
+      ...prevAnswers,
+      [currentQuestionIndex]: optionId,
+    }));
   };
 
-  const saveQuizResults = async (finalScore: number) => {
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const isAnswered = (optionId: string) => {
+    return answers[currentQuestionIndex] === optionId;
+  };
+
+  const handleSubmitQuiz = async () => {
     if (!user) return;
 
     try {
-      // Update usage tracking
-      await updateUsage({ examType, subject: subjectId });
+      const endTime = new Date();
+      const totalTime = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
 
-      // Save exam results
+      // Calculate score
+      let correctAnswers = 0;
+      const answersArray = Object.entries(answers).map(([questionIndex, selectedAnswer]) => {
+        const questionIdx = parseInt(questionIndex);
+        const question = questions[questionIdx];
+        const correctAnswer = question.options.find(opt => opt.is_correct)?.id;
+        const isCorrect = selectedAnswer === correctAnswer;
+        
+        if (isCorrect) correctAnswers++;
+        
+        return {
+          question_id: question.id,
+          selected_option_id: selectedAnswer,
+          is_correct: isCorrect,
+        };
+      });
+
+      const percentage = Math.round((correctAnswers / questions.length) * 100);
+
+      // Save exam result
       const { data: examResult, error: resultError } = await supabase
         .from('exam_results')
         .insert({
           user_id: user.id,
           exam_type: examType,
-          subject: subjectId,
-          score: finalScore,
-          total_questions: quizData.questions.length,
-          percentage: (finalScore / quizData.questions.length) * 100,
-          time_taken: 300 - timeLeft, // time spent
+          subject: subject,
+          score: correctAnswers,
+          total_questions: questions.length,
+          percentage: percentage,
+          time_taken: totalTime,
         })
         .select()
         .single();
 
       if (resultError) throw resultError;
 
-      // Save user answers
-      const userAnswersData = quizData.questions.map((question, index) => ({
+      // Generate attempt ID for compatibility
+      const attemptId = crypto.randomUUID();
+
+      // Save user answers with proper mapping
+      const userAnswersToSave = answersArray.map(answer => ({
+        attempt_id: attemptId,
         result_id: examResult.id,
-        question_id: question.id,
-        selected_answer: answers[index] || null,
-        correct_answer: question.correctAnswer,
-        is_correct: answers[index] === question.correctAnswer,
+        question_id: answer.question_id,
+        selected_option_id: answer.selected_option_id,
+        is_correct: answer.is_correct,
+        answer_time: new Date().toISOString(),
       }));
 
       const { error: answersError } = await supabase
         .from('user_answers')
-        .insert(userAnswersData);
+        .insert(userAnswersToSave);
 
       if (answersError) throw answersError;
 
-      console.log('Quiz results saved successfully');
+      // Update usage tracking for free users
+      if (!isPremium) {
+        await updateUsage({ examType, subject });
+      }
+
+      // Navigate to results
+      navigate('/quiz-results', {
+        state: {
+          score: correctAnswers,
+          totalQuestions: questions.length,
+          percentage: percentage,
+          timeSpent: totalTime,
+          examType: examType,
+          subject: subject,
+          resultId: examResult.id,
+        }
+      });
+
     } catch (error) {
       console.error('Error saving quiz results:', error);
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถบันทึกผลการสอบได้ กรุณาลองใหม่อีกครั้ง',
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleFinishQuiz = async () => {
-    const finalScore = calculateScore();
-    setScore(finalScore);
-    setQuizCompleted(true);
-    
-    // Store quiz results in session storage for fallback
-    sessionStorage.setItem('quizResults', JSON.stringify({
-      score: finalScore,
-      total: quizData.questions.length,
-      exam: examType,
-      subject: subjectId,
-      answers: answers,
-      questions: quizData.questions
-    }));
-
-    // Save to database if user is authenticated
-    if (user) {
-      await saveQuizResults(finalScore);
-      navigate(`/quiz-results?score=${finalScore}&total=${quizData.questions.length}&exam=${examType}&subject=${subjectId}`);
-    } else {
-      // Show registration popup for non-authenticated users
-      setShowPopup(true);
-    }
-  };
-
-  const handleRegisterSuccess = () => {
-    setShowPopup(false);
-    navigate(`/quiz-results?score=${score}&total=${quizData.questions.length}&exam=${examType}&subject=${subjectId}`);
-  };
-
-  const handleCancelPopup = () => {
-    setShowPopup(false);
-    navigate('/');
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  if (!quizData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">ไม่พบข้อสอบ</h1>
-          <Button onClick={() => navigate('/quiz-selection')}>
-            กลับไปเลือกข้อสอบ
-          </Button>
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <div>กำลังโหลดข้อสอบ...</div>;
   }
 
-  if (quizCompleted && !user) {
-    return (
-      <>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl">
-            <CardContent className="p-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">ทำแบบทดสอบเสร็จสิ้น!</h1>
-              <p className="text-xl text-gray-600 mb-6">
-                คุณได้ <span className="font-bold text-orange-600">{score}/{quizData.questions.length}</span> คะแนน
-              </p>
-              <p className="text-gray-500">
-                กรุณาลงทะเบียนเพื่อดูผลการสอบโดยละเอียดและเฉลย
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        <RegisterPopup
-          score={score}
-          totalQuestions={quizData.questions.length}
-          onRegisterSuccess={handleRegisterSuccess}
-          onCancel={handleCancelPopup}
-          isOpen={showPopup}
-        />
-      </>
-    );
+  if (!questions || questions.length === 0) {
+    return <div>ไม่มีข้อสอบในขณะนี้</div>;
   }
 
-  const progress = ((currentQuestion + 1) / quizData.questions.length) * 100;
-  const currentQ = quizData.questions[currentQuestion];
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
-    <QuotaChecker examType={examType} subject={subjectId}>
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-gray-800">{quizData.title}</h1>
-              <div className="flex items-center space-x-2 text-orange-600">
-                <Clock className="h-5 w-5" />
-                <span className="font-mono text-lg font-semibold">{formatTime(timeLeft)}</span>
+    <QuotaChecker examType={examType} subject={subject}>
+      <div className="container mx-auto mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <div className="flex items-center justify-between">
+                <span>{`คำถามที่ ${currentQuestionIndex + 1} จาก ${questions.length}`}</span>
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4" />
+                  <span>{`${Math.round(progress)}%`}</span>
+                </div>
               </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Progress value={progress} />
+            <div className="text-lg font-semibold">{currentQuestion.question_text}</div>
+            <div className="space-y-2">
+              {currentQuestion.options.map((option) => (
+                <Button
+                  key={option.id}
+                  variant="outline"
+                  className={`w-full justify-start ${isAnswered(option.id) ? 'bg-green-100 hover:bg-green-200' : ''}`}
+                  onClick={() => handleAnswer(option.id)}
+                >
+                  {isAnswered(option.id) ? (
+                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <XCircle className="mr-2 h-4 w-4 text-gray-400" />
+                  )}
+                  {option.option_text}
+                </Button>
+              ))}
             </div>
-            
-            <Progress value={progress} className="h-3" />
-            <p className="text-sm text-gray-500 mt-2">
-              ข้อ {currentQuestion + 1} จาก {quizData.questions.length}
-            </p>
-          </div>
-
-          {/* Question Card */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl">
-                {currentQ.question}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {currentQ.options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerSelect(index)}
-                    className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
-                      answers[currentQuestion] === index
-                        ? 'border-orange-500 bg-orange-50 text-orange-800'
-                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
-                    }`}
-                  >
-                    <span className="font-medium mr-3">
-                      {String.fromCharCode(65 + index)}.
-                    </span>
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Navigation */}
-          <div className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
-              className="flex items-center space-x-2"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>ข้อก่อนหน้า</span>
-            </Button>
-
-            <div className="flex space-x-4">
-              {currentQuestion === quizData.questions.length - 1 ? (
-                <Button
-                  onClick={handleFinishQuiz}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8"
-                  disabled={answers[currentQuestion] === undefined}
-                >
-                  ส่งคำตอบ
-                </Button>
+            <div className="flex justify-between">
+              <Button
+                variant="secondary"
+                onClick={handlePreviousQuestion}
+                disabled={currentQuestionIndex === 0}
+              >
+                คำถามก่อนหน้า
+              </Button>
+              {currentQuestionIndex === questions.length - 1 ? (
+                <Button onClick={handleSubmitQuiz}>ส่งคำตอบ</Button>
               ) : (
-                <Button
-                  onClick={handleNext}
-                  disabled={answers[currentQuestion] === undefined}
-                  className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600"
-                >
-                  <span>ข้อต่อไป</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                <Button onClick={handleNextQuestion}>คำถามถัดไป</Button>
               )}
             </div>
-          </div>
-
-          {/* Question Overview */}
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="text-lg">ภาพรวมการตอบ</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-                {quizData.questions.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentQuestion(index)}
-                    className={`aspect-square rounded-lg border-2 text-sm font-medium transition-all ${
-                      index === currentQuestion
-                        ? 'border-orange-500 bg-orange-500 text-white'
-                        : answers[index] !== undefined
-                        ? 'border-green-500 bg-green-500 text-white'
-                        : 'border-gray-300 bg-white text-gray-600 hover:border-orange-300'
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <RegisterPopup
-          score={score}
-          totalQuestions={quizData.questions.length}
-          onRegisterSuccess={handleRegisterSuccess}
-          onCancel={handleCancelPopup}
-          isOpen={showPopup}
-        />
+          </CardContent>
+        </Card>
       </div>
     </QuotaChecker>
   );
