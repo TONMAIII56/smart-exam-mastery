@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,16 +11,16 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { QuotaChecker } from '@/components/subscription/QuotaChecker';
 import { useToast } from '@/hooks/use-toast';
 
-interface Question {
-  id: string;
-  question_text: string;
-  options: Option[];
-}
-
 interface Option {
   id: string;
   option_text: string;
   is_correct: boolean;
+}
+
+interface Question {
+  id: string;
+  question_text: string;
+  options: Option[];
 }
 
 const Quiz = () => {
@@ -39,29 +40,53 @@ const Quiz = () => {
     const fetchQuestions = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        // First, get questions for the exam type and subject
+        const { data: questionsData, error: questionsError } = await supabase
           .from('questions')
-          .select('*')
-          .eq('exam_type', examType)
-          .eq('subject', subject);
+          .select(`
+            id,
+            question_text,
+            options (
+              id,
+              option_text,
+              is_correct
+            )
+          `)
+          .eq('exam_id', examType)
+          .eq('exam_type', examType);
 
-        if (error) {
-          console.error('Error fetching questions:', error);
+        if (questionsError) {
+          console.error('Error fetching questions:', questionsError);
           toast({
             title: 'เกิดข้อผิดพลาด',
             description: 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง',
             variant: 'destructive',
           });
         } else {
-          setQuestions(data || []);
+          const formattedQuestions: Question[] = (questionsData || []).map(q => ({
+            id: q.id,
+            question_text: q.question_text,
+            options: q.options || []
+          }));
+          
+          setQuestions(formattedQuestions);
           setStartTime(new Date());
         }
+      } catch (error) {
+        console.error('Error in fetchQuestions:', error);
+        toast({
+          title: 'เกิดข้อผิดพลาด',
+          description: 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง',
+          variant: 'destructive',
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchQuestions();
+    if (examType && subject) {
+      fetchQuestions();
+    }
   }, [examType, subject, toast]);
 
   const handleAnswer = (optionId: string) => {
@@ -92,7 +117,7 @@ const Quiz = () => {
 
     try {
       const endTime = new Date();
-      const totalTime = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+      const totalTime = startTime ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) : 0;
 
       // Calculate score
       let correctAnswers = 0;
