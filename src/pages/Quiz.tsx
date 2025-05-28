@@ -40,20 +40,11 @@ const Quiz = () => {
     const fetchQuestions = async () => {
       setIsLoading(true);
       try {
-        // First, get questions for the exam type and subject
+        // Fetch questions and options separately to avoid complex type inference
         const { data: questionsData, error: questionsError } = await supabase
           .from('questions')
-          .select(`
-            id,
-            question_text,
-            options (
-              id,
-              option_text,
-              is_correct
-            )
-          `)
-          .eq('exam_id', examType)
-          .eq('exam_type', examType);
+          .select('id, question_text, exam_id')
+          .eq('exam_id', examType);
 
         if (questionsError) {
           console.error('Error fetching questions:', questionsError);
@@ -62,16 +53,49 @@ const Quiz = () => {
             description: 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง',
             variant: 'destructive',
           });
-        } else {
-          const formattedQuestions: Question[] = (questionsData || []).map(q => ({
-            id: q.id,
-            question_text: q.question_text,
-            options: q.options || []
-          }));
-          
-          setQuestions(formattedQuestions);
-          setStartTime(new Date());
+          setIsLoading(false);
+          return;
         }
+
+        if (!questionsData || questionsData.length === 0) {
+          setQuestions([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch options for all questions
+        const questionIds = questionsData.map(q => q.id);
+        const { data: optionsData, error: optionsError } = await supabase
+          .from('options')
+          .select('id, option_text, is_correct, question_id')
+          .in('question_id', questionIds);
+
+        if (optionsError) {
+          console.error('Error fetching options:', optionsError);
+          toast({
+            title: 'เกิดข้อผิดพลาด',
+            description: 'ไม่สามารถโหลดตัวเลือกได้ กรุณาลองใหม่อีกครั้ง',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Combine questions with their options
+        const formattedQuestions: Question[] = questionsData.map(question => ({
+          id: question.id,
+          question_text: question.question_text,
+          options: (optionsData || [])
+            .filter(option => option.question_id === question.id)
+            .map(option => ({
+              id: option.id,
+              option_text: option.option_text,
+              is_correct: option.is_correct || false
+            }))
+        }));
+        
+        setQuestions(formattedQuestions);
+        setStartTime(new Date());
       } catch (error) {
         console.error('Error in fetchQuestions:', error);
         toast({
