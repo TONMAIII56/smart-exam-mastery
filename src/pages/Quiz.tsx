@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,11 +39,42 @@ const Quiz = () => {
     const fetchQuestions = async () => {
       setIsLoading(true);
       try {
-        // Fetch questions and options separately to avoid complex type inference
+        console.log('Fetching questions for examType:', examType, 'subject:', subject);
+        
+        // First, get the exam ID based on exam_type and subject
+        const { data: examData, error: examError } = await supabase
+          .from('exams')
+          .select('id')
+          .eq('exam_type', examType)
+          .eq('subject', subject)
+          .limit(1);
+
+        if (examError) {
+          console.error('Error fetching exam:', examError);
+          toast({
+            title: 'เกิดข้อผิดพลาด',
+            description: 'ไม่สามารถโหลดข้อมูลการสอบได้ กรุณาลองใหม่อีกครั้ง',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (!examData || examData.length === 0) {
+          console.log('No exam found for:', examType, subject);
+          setQuestions([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const examId = examData[0].id;
+        console.log('Found exam ID:', examId);
+
+        // Fetch questions for this exam
         const { data: questionsData, error: questionsError } = await supabase
           .from('questions')
           .select('id, question_text, exam_id')
-          .eq('exam_id', examType);
+          .eq('exam_id', examId);
 
         if (questionsError) {
           console.error('Error fetching questions:', questionsError);
@@ -58,10 +88,13 @@ const Quiz = () => {
         }
 
         if (!questionsData || questionsData.length === 0) {
+          console.log('No questions found for exam ID:', examId);
           setQuestions([]);
           setIsLoading(false);
           return;
         }
+
+        console.log('Found questions:', questionsData.length);
 
         // Fetch options for all questions
         const questionIds = questionsData.map(q => q.id);
@@ -81,6 +114,8 @@ const Quiz = () => {
           return;
         }
 
+        console.log('Found options:', optionsData?.length || 0);
+
         // Combine questions with their options
         const formattedQuestions: Question[] = questionsData.map(question => ({
           id: question.id,
@@ -94,6 +129,7 @@ const Quiz = () => {
             }))
         }));
         
+        console.log('Formatted questions:', formattedQuestions.length);
         setQuestions(formattedQuestions);
         setStartTime(new Date());
       } catch (error) {
@@ -110,6 +146,9 @@ const Quiz = () => {
 
     if (examType && subject) {
       fetchQuestions();
+    } else {
+      console.log('Missing examType or subject:', { examType, subject });
+      setIsLoading(false);
     }
   }, [examType, subject, toast]);
 
@@ -227,11 +266,26 @@ const Quiz = () => {
   };
 
   if (isLoading) {
-    return <div>กำลังโหลดข้อสอบ...</div>;
+    return (
+      <div className="container mx-auto mt-8 text-center">
+        <div className="text-lg">กำลังโหลดข้อสอบ...</div>
+      </div>
+    );
   }
 
   if (!questions || questions.length === 0) {
-    return <div>ไม่มีข้อสอบในขณะนี้</div>;
+    return (
+      <div className="container mx-auto mt-8 text-center">
+        <Card>
+          <CardContent className="p-8">
+            <div className="text-lg mb-4">ไม่พบข้อสอบสำหรับหมวดนี้</div>
+            <Button onClick={() => navigate('/quiz-selection')}>
+              กลับไปเลือกหมวดใหม่
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const currentQuestion = questions[currentQuestionIndex];
