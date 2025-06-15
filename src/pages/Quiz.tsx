@@ -1,349 +1,337 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Clock, CheckCircle, XCircle } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { useSubscription } from '@/hooks/useSubscription';
-import { QuotaChecker } from '@/components/subscription/QuotaChecker';
-import { useToast } from '@/hooks/use-toast';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ExamHeader } from '@/components/exam/ExamHeader';
+import { QuestionCard } from '@/components/exam/QuestionCard';
+import { ExamResult } from '@/components/exam/ExamResult';
 
 interface Option {
   id: string;
-  option_text: string;
-  is_correct: boolean;
+  text: string;
 }
 
 interface Question {
   id: string;
-  question_text: string;
-  options: Option[];
+  text: string;
+  type: 'multiple_choice' | 'true_false';
+  options?: Option[];
+  correctAnswer: string;
+  explanation?: string;
+  audioUrl?: string;
 }
 
-const Quiz = () => {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { examType, subject } = location.state || { examType: '', subject: '' };
-  const { isPremium, updateUsage } = useSubscription();
-  const { toast } = useToast();
+interface ExamData {
+  id: string;
+  title: string;
+  subject: string;
+  duration: number;
+  questions: Question[];
+}
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      setIsLoading(true);
-      try {
-        console.log('Fetching questions for examType:', examType, 'subject:', subject);
-        
-        // First, get the exam ID based on exam_type and subject
-        const { data: examData, error: examError } = await supabase
-          .from('exams')
-          .select('id')
-          .eq('exam_type', examType)
-          .eq('subject', subject)
-          .limit(1);
-
-        if (examError) {
-          console.error('Error fetching exam:', examError);
-          toast({
-            title: 'เกิดข้อผิดพลาด',
-            description: 'ไม่สามารถโหลดข้อมูลการสอบได้ กรุณาลองใหม่อีกครั้ง',
-            variant: 'destructive',
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        if (!examData || examData.length === 0) {
-          console.log('No exam found for:', examType, subject);
-          setQuestions([]);
-          setIsLoading(false);
-          return;
-        }
-
-        const examId = examData[0].id;
-        console.log('Found exam ID:', examId);
-
-        // Fetch questions for this exam
-        const { data: questionsData, error: questionsError } = await supabase
-          .from('questions')
-          .select('id, question_text, exam_id')
-          .eq('exam_id', examId);
-
-        if (questionsError) {
-          console.error('Error fetching questions:', questionsError);
-          toast({
-            title: 'เกิดข้อผิดพลาด',
-            description: 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง',
-            variant: 'destructive',
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        if (!questionsData || questionsData.length === 0) {
-          console.log('No questions found for exam ID:', examId);
-          setQuestions([]);
-          setIsLoading(false);
-          return;
-        }
-
-        console.log('Found questions:', questionsData.length);
-
-        // Fetch options for all questions
-        const questionIds = questionsData.map(q => q.id);
-        const { data: optionsData, error: optionsError } = await supabase
-          .from('options')
-          .select('id, option_text, is_correct, question_id')
-          .in('question_id', questionIds);
-
-        if (optionsError) {
-          console.error('Error fetching options:', optionsError);
-          toast({
-            title: 'เกิดข้อผิดพลาด',
-            description: 'ไม่สามารถโหลดตัวเลือกได้ กรุณาลองใหม่อีกครั้ง',
-            variant: 'destructive',
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        console.log('Found options:', optionsData?.length || 0);
-
-        // Combine questions with their options
-        const formattedQuestions: Question[] = questionsData.map(question => ({
-          id: question.id,
-          question_text: question.question_text,
-          options: (optionsData || [])
-            .filter(option => option.question_id === question.id)
-            .map(option => ({
-              id: option.id,
-              option_text: option.option_text,
-              is_correct: option.is_correct || false
-            }))
-        }));
-        
-        console.log('Formatted questions:', formattedQuestions.length);
-        setQuestions(formattedQuestions);
-        setStartTime(new Date());
-      } catch (error) {
-        console.error('Error in fetchQuestions:', error);
-        toast({
-          title: 'เกิดข้อผิดพลาด',
-          description: 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (examType && subject) {
-      fetchQuestions();
-    } else {
-      console.log('Missing examType or subject:', { examType, subject });
-      setIsLoading(false);
+// Mock data สำหรับข้อสอบราชการ - ภาษาไทย
+const civilServiceThaiMock: ExamData = {
+  id: 'civil-thai',
+  title: 'การสอบราชการ - ภาษาไทย',
+  subject: 'thai-language',
+  duration: 90,
+  questions: [
+    {
+      id: 'q1',
+      text: 'คำว่า "อักษร" หมายถึงข้อใด?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'ตัวหนังสือ' },
+        { id: 'b', text: 'เสียงพูด' },
+        { id: 'c', text: 'ภาษาเขียน' },
+        { id: 'd', text: 'สัญลักษณ์' }
+      ],
+      correctAnswer: 'a',
+      explanation: 'อักษร หมายถึง ตัวหนังสือหรือตัวพยัญชนะที่ใช้ในการเขียน'
+    },
+    {
+      id: 'q2',
+      text: 'ข้อใดเป็นคำราชาศัพท์?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'กิน' },
+        { id: 'b', text: 'เสวย' },
+        { id: 'c', text: 'ทาน' },
+        { id: 'd', text: 'บริโภค' }
+      ],
+      correctAnswer: 'b',
+      explanation: '"เสวย" เป็นคำราชาศัพท์ที่ใช้กับพระมหากษัตริย์และพระบรมวงศานุวงศ์'
+    },
+    {
+      id: 'q3',
+      text: 'ประโยค "เขาไปตลาดเมื่อเช้า" มีกรรมกี่ตัว?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '0 ตัว' },
+        { id: 'b', text: '1 ตัว' },
+        { id: 'c', text: '2 ตัว' },
+        { id: 'd', text: '3 ตัว' }
+      ],
+      correctAnswer: 'a',
+      explanation: 'ประโยคนี้ไม่มีกรรม เพราะ "ไป" เป็นกริยาอกรรมก'
+    },
+    {
+      id: 'q4',
+      text: 'คำว่า "สันโดษ" มีความหมายว่าอย่างไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'เศร้าโศก' },
+        { id: 'b', text: 'พอใจในสิ่งที่มี' },
+        { id: 'c', text: 'โกรธแค้น' },
+        { id: 'd', text: 'ดีใจยินดี' }
+      ],
+      correctAnswer: 'b',
+      explanation: '"สันโดษ" หมายถึง การพอใจในสิ่งที่ตนมี ไม่โลภมาก'
+    },
+    {
+      id: 'q5',
+      text: 'ข้อใดเป็นการใช้เครื่องหมายวรรคตอนที่ถูกต้อง?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'เขาถาม "คุณไปไหน"' },
+        { id: 'b', text: 'เขาถาม "คุณไปไหน?"' },
+        { id: 'c', text: 'เขาถาม, "คุณไปไหน?"' },
+        { id: 'd', text: 'เขาถามว่า "คุณไปไหน?"' }
+      ],
+      correctAnswer: 'd',
+      explanation: 'การใช้คำว่า "ว่า" ก่อนเครื่องหมายคำพูดเป็นการใช้ที่ถูกต้อง'
     }
-  }, [examType, subject, toast]);
+  ]
+};
 
-  const handleAnswer = (optionId: string) => {
-    setAnswers(prevAnswers => ({
-      ...prevAnswers,
-      [currentQuestionIndex]: optionId,
+// Mock data สำหรับข้อสอบ TOEIC - การฟัง
+const toeicListeningMock: ExamData = {
+  id: 'toeic-listening',
+  title: 'TOEIC - การฟัง',
+  subject: 'listening',
+  duration: 45,
+  questions: [
+    {
+      id: 'q1',
+      text: 'Listen to the conversation and answer the question: What time does the meeting start?',
+      audioUrl: '/audio/toeic-1.mp3',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '9:00 AM' },
+        { id: 'b', text: '10:00 AM' },
+        { id: 'c', text: '2:00 PM' },
+        { id: 'd', text: '3:00 PM' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'The woman says: "The meeting has been moved to 10 o\'clock."'
+    },
+    {
+      id: 'q2',
+      text: 'Listen to the announcement: Where is flight CA102 departing for?',
+      audioUrl: '/audio/toeic-2.mp3',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'Bangkok' },
+        { id: 'b', text: 'Singapore' },
+        { id: 'c', text: 'Tokyo' },
+        { id: 'd', text: 'Seoul' }
+      ],
+      correctAnswer: 'd',
+      explanation: 'The announcement says: "Flight CA102 to Seoul is now boarding."'
+    }
+  ]
+};
+
+const Quiz: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const exam = searchParams.get('exam');
+  const subject = searchParams.get('subject');
+  
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
+  const [examData, setExamData] = useState<ExamData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // โหลดข้อสอบตามประเภทและหมวดหมู่
+  useEffect(() => {
+    if (!exam || !subject) {
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log('Loading exam:', exam, 'subject:', subject);
+    
+    // จำลองการโหลดข้อมูล
+    setTimeout(() => {
+      if (exam === 'civil-service' && subject === 'thai-language') {
+        setExamData(civilServiceThaiMock);
+        setTimeLeft(civilServiceThaiMock.duration * 60);
+      } else if (exam === 'toeic' && subject === 'listening') {
+        setExamData(toeicListeningMock);
+        setTimeLeft(toeicListeningMock.duration * 60);
+      } else {
+        // ข้อสอบอื่นๆ ใช้ข้อมูลภาษาไทยเป็นค่าเริ่มต้น
+        setExamData(civilServiceThaiMock);
+        setTimeLeft(civilServiceThaiMock.duration * 60);
+      }
+      setIsLoading(false);
+    }, 1000);
+  }, [exam, subject]);
+
+  const handleAnswer = (questionId: string, answer: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
     }));
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+  const handleNext = () => {
+    if (examData && currentQuestion < examData.questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
     }
   };
 
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+  const handlePrev = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(prev => prev - 1);
     }
   };
 
-  const isAnswered = (optionId: string) => {
-    return answers[currentQuestionIndex] === optionId;
+  const handleSubmit = () => {
+    setIsFinished(true);
   };
 
-  const handleSubmitQuiz = async () => {
-    if (!user) return;
-
-    try {
-      const endTime = new Date();
-      const totalTime = startTime ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) : 0;
-
-      // Calculate score
-      let correctAnswers = 0;
-      const answersArray = Object.entries(answers).map(([questionIndex, selectedAnswer]) => {
-        const questionIdx = parseInt(questionIndex);
-        const question = questions[questionIdx];
-        const correctAnswer = question.options.find(opt => opt.is_correct)?.id;
-        const isCorrect = selectedAnswer === correctAnswer;
-        
-        if (isCorrect) correctAnswers++;
-        
-        return {
-          question_id: question.id,
-          selected_option_id: selectedAnswer,
-          is_correct: isCorrect,
-        };
-      });
-
-      const percentage = Math.round((correctAnswers / questions.length) * 100);
-
-      // Save exam result
-      const { data: examResult, error: resultError } = await supabase
-        .from('exam_results')
-        .insert({
-          user_id: user.id,
-          exam_type: examType,
-          subject: subject,
-          score: correctAnswers,
-          total_questions: questions.length,
-          percentage: percentage,
-          time_taken: totalTime,
-        })
-        .select()
-        .single();
-
-      if (resultError) throw resultError;
-
-      // Generate attempt ID for compatibility
-      const attemptId = crypto.randomUUID();
-
-      // Save user answers with proper mapping
-      const userAnswersToSave = answersArray.map(answer => ({
-        attempt_id: attemptId,
-        result_id: examResult.id,
-        question_id: answer.question_id,
-        selected_option_id: answer.selected_option_id,
-        is_correct: answer.is_correct,
-        answer_time: new Date().toISOString(),
-      }));
-
-      const { error: answersError } = await supabase
-        .from('user_answers')
-        .insert(userAnswersToSave);
-
-      if (answersError) throw answersError;
-
-      // Update usage tracking for free users
-      if (!isPremium) {
-        await updateUsage({ examType, subject });
+  // คำนวณคะแนน
+  const calculateScore = () => {
+    if (!examData) return 0;
+    
+    let correct = 0;
+    examData.questions.forEach((question) => {
+      if (answers[question.id] === question.correctAnswer) {
+        correct++;
       }
-
-      // Navigate to results
-      navigate('/quiz-results', {
-        state: {
-          score: correctAnswers,
-          totalQuestions: questions.length,
-          percentage: percentage,
-          timeSpent: totalTime,
-          examType: examType,
-          subject: subject,
-          resultId: examResult.id,
-        }
-      });
-
-    } catch (error) {
-      console.error('Error saving quiz results:', error);
-      toast({
-        title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถบันทึกผลการสอบได้ กรุณาลองใหม่อีกครั้ง',
-        variant: 'destructive',
-      });
-    }
+    });
+    return Math.round((correct / examData.questions.length) * 100);
   };
 
   if (isLoading) {
     return (
-      <div className="container mx-auto mt-8 text-center">
-        <div className="text-lg">กำลังโหลดข้อสอบ...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">กำลังโหลดข้อสอบ...</p>
+          <p className="text-gray-500">
+            {exam && subject ? (
+              <>
+                <span className="font-medium capitalize">{exam}</span> -{' '}
+                <span className="capitalize">{subject}</span>
+              </>
+            ) : (
+              'กรุณาเลือกข้อสอบ'
+            )}
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (!questions || questions.length === 0) {
+  if (!examData) {
     return (
-      <div className="container mx-auto mt-8 text-center">
-        <Card>
-          <CardContent className="p-8">
-            <div className="text-lg mb-4">ไม่พบข้อสอบสำหรับหมวดนี้</div>
-            <Button onClick={() => navigate('/quiz-selection')}>
-              กลับไปเลือกหมวดใหม่
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">ไม่พบข้อสอบ</h2>
+          <p className="text-gray-600 mb-4">กรุณาเลือกข้อสอบที่ต้องการ</p>
+          <button
+            onClick={() => navigate('/quiz-selection')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md"
+          >
+            เลือกข้อสอบ
+          </button>
+        </div>
       </div>
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  if (isFinished) {
+    return <ExamResult 
+      score={calculateScore()} 
+      totalQuestions={examData.questions.length}
+      answers={answers}
+      questions={examData.questions}
+    />;
+  }
+
+  const currentQ = examData.questions[currentQuestion];
 
   return (
-    <QuotaChecker examType={examType} subject={subject}>
-      <div className="container mx-auto mt-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <div className="flex items-center justify-between">
-                <span>{`คำถามที่ ${currentQuestionIndex + 1} จาก ${questions.length}`}</span>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{`${Math.round(progress)}%`}</span>
-                </div>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Progress value={progress} />
-            <div className="text-lg font-semibold">{currentQuestion.question_text}</div>
-            <div className="space-y-2">
-              {currentQuestion.options.map((option) => (
-                <Button
-                  key={option.id}
-                  variant="outline"
-                  className={`w-full justify-start ${isAnswered(option.id) ? 'bg-green-100 hover:bg-green-200' : ''}`}
-                  onClick={() => handleAnswer(option.id)}
-                >
-                  {isAnswered(option.id) ? (
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                  ) : (
-                    <XCircle className="mr-2 h-4 w-4 text-gray-400" />
-                  )}
-                  {option.option_text}
-                </Button>
-              ))}
-            </div>
-            <div className="flex justify-between">
-              <Button
-                variant="secondary"
-                onClick={handlePreviousQuestion}
-                disabled={currentQuestionIndex === 0}
-              >
-                คำถามก่อนหน้า
-              </Button>
-              {currentQuestionIndex === questions.length - 1 ? (
-                <Button onClick={handleSubmitQuiz}>ส่งคำตอบ</Button>
-              ) : (
-                <Button onClick={handleNextQuestion}>คำถามถัดไป</Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="bg-gray-50 min-h-screen">
+      <ExamHeader 
+        title={examData.title}
+        currentQuestion={currentQuestion + 1}
+        totalQuestions={examData.questions.length}
+        timeLeft={timeLeft}
+        setTimeLeft={setTimeLeft}
+      />
+      
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <QuestionCard 
+          question={currentQ}
+          selectedAnswer={answers[currentQ.id]}
+          onAnswer={handleAnswer}
+        />
+        
+        <div className="mt-8 flex justify-between">
+          <button
+            onClick={handlePrev}
+            disabled={currentQuestion === 0}
+            className={`px-6 py-3 rounded-md transition-colors ${
+              currentQuestion === 0 
+                ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+            }`}
+          >
+            ย้อนกลับ
+          </button>
+          
+          {currentQuestion < examData.questions.length - 1 ? (
+            <button
+              onClick={handleNext}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md transition-colors"
+            >
+              ถัดไป
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md transition-colors"
+            >
+              ส่งคำตอบ
+            </button>
+          )}
+        </div>
+        
+        <div className="mt-6 grid grid-cols-5 gap-2">
+          {examData.questions.map((q, index) => (
+            <button
+              key={q.id}
+              onClick={() => setCurrentQuestion(index)}
+              className={`h-10 rounded-md flex items-center justify-center transition-colors ${
+                currentQuestion === index
+                  ? 'bg-blue-600 text-white'
+                  : answers[q.id]
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
       </div>
-    </QuotaChecker>
+    </div>
   );
 };
 
