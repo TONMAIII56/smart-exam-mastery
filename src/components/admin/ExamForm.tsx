@@ -1,27 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { X } from 'lucide-react';
-import { 
-  ExamFormData, 
-  DifficultyLevel, 
-  ExamType, 
-  SubjectType, 
-  ExamStatus,
-  SUBJECT_OPTIONS,
-  DIFFICULTY_OPTIONS,
-  EXAM_TYPE_OPTIONS,
-  STATUS_OPTIONS
-} from '@/types/admin';
+import { useMutation } from '@tanstack/react-query';
 
 interface ExamFormProps {
   exam?: any;
@@ -29,303 +16,234 @@ interface ExamFormProps {
   onCancel: () => void;
 }
 
-const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
-  const [formData, setFormData] = useState<ExamFormData>({
-    exam_name: '',
-    description: '',
-    exam_type: 'civil-service',
-    subject: 'general-knowledge',
-    time_limit: '',
-    passing_score: '',
-    difficulty_level: 'medium',
-    premium_only: false,
-    visibility: 'public',
-    exam_code: '',
-    tags: '',
-    status: 'draft'
+const ExamForm = ({ exam, onSuccess, onCancel }: ExamFormProps) => {
+  const [formData, setFormData] = useState({
+    exam_name: exam?.exam_name || '',
+    exam_code: exam?.exam_code || '',
+    exam_type: exam?.exam_type || 'civil-service',
+    subject: exam?.subject || 'general-knowledge',
+    description: exam?.description || '',
+    time_limit: exam?.time_limit || 90,
+    passing_score: exam?.passing_score || 70,
+    difficulty_level: exam?.difficulty_level || 'medium',
+    premium_only: exam?.premium_only || false,
+    status: exam?.status || 'draft',
+    visibility: exam?.visibility || 'public'
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const { user } = useAuth();
+
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (exam) {
-      setFormData({
-        exam_name: exam.exam_name || '',
-        description: exam.description || '',
-        exam_type: exam.exam_type || 'civil-service',
-        subject: exam.subject || 'general-knowledge',
-        time_limit: exam.time_limit?.toString() || '',
-        passing_score: exam.passing_score?.toString() || '',
-        difficulty_level: exam.difficulty_level || 'medium',
-        premium_only: exam.premium_only || false,
-        visibility: exam.visibility || 'public',
-        exam_code: exam.exam_code || '',
-        tags: '',
-        status: exam.status || 'draft'
-      });
-      setTags(exam.tags || []);
-    }
-  }, [exam]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const examData = {
-        exam_name: formData.exam_name,
-        description: formData.description,
-        exam_type: formData.exam_type as ExamType,
-        subject: formData.subject as SubjectType,
-        time_limit: formData.time_limit ? parseInt(formData.time_limit) : null,
-        passing_score: formData.passing_score ? parseInt(formData.passing_score) : null,
-        difficulty_level: formData.difficulty_level as DifficultyLevel,
-        premium_only: formData.premium_only,
-        visibility: formData.visibility,
-        exam_code: formData.exam_code,
-        tags: tags,
-        status: formData.status as ExamStatus,
-        updated_at: new Date().toISOString(),
-        ...(exam ? {} : { created_by: user?.id, created_at: new Date().toISOString() })
-      };
-
+  const createExamMutation = useMutation({
+    mutationFn: async (data: any) => {
       if (exam) {
         const { error } = await supabase
           .from('exams')
-          .update(examData)
+          .update(data)
           .eq('id', exam.id);
-        
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('exams')
-          .insert([examData]);
-        
+          .insert([data]);
         if (error) throw error;
       }
-
+    },
+    onSuccess: () => {
       toast({
         title: 'สำเร็จ',
         description: exam ? 'อัพเดทข้อสอบแล้ว' : 'สร้างข้อสอบใหม่แล้ว',
       });
-
       onSuccess();
-    } catch (error) {
-      console.error('Error saving exam:', error);
+    },
+    onError: () => {
       toast({
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถบันทึกข้อสอบได้',
+        description: 'ไม่สามารถบันทึกข้อมูลได้',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createExamMutation.mutate(formData);
   };
 
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    }
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="exam_name">Exam Name *</Label>
-            <Input
-              id="exam_name"
-              value={formData.exam_name}
-              onChange={(e) => setFormData({ ...formData, exam_name: e.target.value })}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="exam_code">Exam Code</Label>
-            <Input
-              id="exam_code"
-              value={formData.exam_code}
-              onChange={(e) => setFormData({ ...formData, exam_code: e.target.value })}
-              placeholder="e.g., MATH-2024-001"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="exam_type">Exam Type *</Label>
-            <Select value={formData.exam_type} onValueChange={(value: ExamType) => setFormData({ ...formData, exam_type: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select exam type" />
-              </SelectTrigger>
-              <SelectContent>
-                {EXAM_TYPE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="subject">Subject *</Label>
-            <Select value={formData.subject} onValueChange={(value: SubjectType) => setFormData({ ...formData, subject: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select subject" />
-              </SelectTrigger>
-              <SelectContent>
-                {SUBJECT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="difficulty_level">Difficulty Level</Label>
-            <Select value={formData.difficulty_level} onValueChange={(value: DifficultyLevel) => setFormData({ ...formData, difficulty_level: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DIFFICULTY_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="time_limit">Time Limit (minutes)</Label>
-            <Input
-              id="time_limit"
-              type="number"
-              value={formData.time_limit}
-              onChange={(e) => setFormData({ ...formData, time_limit: e.target.value })}
-              min="1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="passing_score">Passing Score (%)</Label>
-            <Input
-              id="passing_score"
-              type="number"
-              value={formData.passing_score}
-              onChange={(e) => setFormData({ ...formData, passing_score: e.target.value })}
-              min="0"
-              max="100"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value: ExamStatus) => setFormData({ ...formData, status: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="visibility">Visibility</Label>
-            <Select value={formData.visibility} onValueChange={(value) => setFormData({ ...formData, visibility: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="public">Public</SelectItem>
-                <SelectItem value="private">Private</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="premium_only"
-              checked={formData.premium_only}
-              onCheckedChange={(checked) => setFormData({ ...formData, premium_only: checked })}
-            />
-            <Label htmlFor="premium_only">Premium Only</Label>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <Label>Tags</Label>
-        <div className="flex gap-2 mb-2">
-          <Input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyPress={handleTagKeyPress}
-            placeholder="Add tag and press Enter"
-            className="flex-1"
-          />
-          <Button type="button" onClick={addTag} variant="outline">
-            Add
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <Badge key={index} variant="secondary" className="flex items-center gap-1">
-              {tag}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => removeTag(tag)}
+    <Card>
+      <CardHeader>
+        <CardTitle>{exam ? 'แก้ไขข้อสอบ' : 'สร้างข้อสอบใหม่'}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="exam_name">ชื่อข้อสอบ</Label>
+              <Input
+                id="exam_name"
+                value={formData.exam_name}
+                onChange={(e) => handleChange('exam_name', e.target.value)}
+                required
               />
-            </Badge>
-          ))}
-        </div>
-      </div>
+            </div>
+            <div>
+              <Label htmlFor="exam_code">รหัสข้อสอบ</Label>
+              <Input
+                id="exam_code"
+                value={formData.exam_code}
+                onChange={(e) => handleChange('exam_code', e.target.value)}
+              />
+            </div>
+          </div>
 
-      <div className="flex justify-end space-x-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : (exam ? 'Update Exam' : 'Create Exam')}
-        </Button>
-      </div>
-    </form>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="exam_type">ประเภทข้อสอบ</Label>
+              <Select
+                value={formData.exam_type}
+                onValueChange={(value) => handleChange('exam_type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="civil-service">การสอบราชการ</SelectItem>
+                  <SelectItem value="toeic">TOEIC</SelectItem>
+                  <SelectItem value="aisa">AISA</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="subject">หมวดวิชา</Label>
+              <Select
+                value={formData.subject}
+                onValueChange={(value) => handleChange('subject', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general-knowledge">ความรู้ทั่วไป</SelectItem>
+                  <SelectItem value="mathematics">คณิตศาสตร์</SelectItem>
+                  <SelectItem value="thai-language">ภาษาไทย</SelectItem>
+                  <SelectItem value="english-language">ภาษาอังกฤษ</SelectItem>
+                  <SelectItem value="listening">การฟัง</SelectItem>
+                  <SelectItem value="reading">การอ่าน</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="description">คำอธิบาย</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleChange('description', e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="time_limit">เวลาทำข้อสอบ (นาที)</Label>
+              <Input
+                id="time_limit"
+                type="number"
+                value={formData.time_limit}
+                onChange={(e) => handleChange('time_limit', parseInt(e.target.value) || 0)}
+                min="1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="passing_score">คะแนนผ่าน (%)</Label>
+              <Input
+                id="passing_score"
+                type="number"
+                value={formData.passing_score}
+                onChange={(e) => handleChange('passing_score', parseInt(e.target.value) || 0)}
+                min="0"
+                max="100"
+              />
+            </div>
+            <div>
+              <Label htmlFor="difficulty_level">ระดับความยาก</Label>
+              <Select
+                value={formData.difficulty_level}
+                onValueChange={(value) => handleChange('difficulty_level', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">ง่าย</SelectItem>
+                  <SelectItem value="medium">ปานกลาง</SelectItem>
+                  <SelectItem value="hard">ยาก</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="status">สถานะ</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleChange('status', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">แบบร่าง</SelectItem>
+                  <SelectItem value="review">รอการตรวจสอบ</SelectItem>
+                  <SelectItem value="published">เผยแพร่แล้ว</SelectItem>
+                  <SelectItem value="archived">เก็บถาวร</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="visibility">การมองเห็น</Label>
+              <Select
+                value={formData.visibility}
+                onValueChange={(value) => handleChange('visibility', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">สาธารณะ</SelectItem>
+                  <SelectItem value="private">ส่วนตัว</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2 pt-6">
+              <input
+                type="checkbox"
+                id="premium_only"
+                checked={formData.premium_only}
+                onChange={(e) => handleChange('premium_only', e.target.checked)}
+                className="rounded"
+              />
+              <Label htmlFor="premium_only">สำหรับสมาชิกพรีเมียมเท่านั้น</Label>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" disabled={createExamMutation.isPending}>
+              {createExamMutation.isPending ? 'กำลังบันทึก...' : 'บันทึก'}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
