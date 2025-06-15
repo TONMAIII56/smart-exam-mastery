@@ -3,12 +3,14 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Check, X, Zap, Star, Settings, RefreshCw } from 'lucide-react';
+import { Crown, Check, X, Zap, Star, Settings, RefreshCw, Archive, BarChart3, Target, Award } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { PaidSubscriptionForm } from '@/components/subscription/PaidSubscriptionForm';
+import { PricingCard } from '@/components/subscription/PricingCard';
+import { WeaknessAnalytics } from '@/components/subscription/WeaknessAnalytics';
+import { FAQ } from '@/components/subscription/FAQ';
 
 const SubscriptionPage = () => {
   const { subscription, isPremium, createCheckout, openCustomerPortal, isCreatingCheckout, isOpeningPortal, refreshSubscription } = useSubscription();
@@ -49,30 +51,95 @@ const SubscriptionPage = () => {
     return null;
   }
 
+  const plans = [
+    {
+      plan: 'รายเดือน',
+      price: '299',
+      originalPrice: undefined,
+      discount: undefined,
+      perMonth: 'ต่อเดือน',
+      features: [
+        'เข้าถึงข้อสอบย้อนหลัง 5 ปี',
+        'ระบบวิเคราะห์จุดอ่อน',
+        'คลังข้อสอบส่วนตัว',
+        'อัพเดตข้อสอบใหม่ตลอดปี'
+      ],
+      isPopular: false,
+      planId: 'premium_monthly' as const
+    },
+    {
+      plan: 'รายปี',
+      price: '1,999',
+      originalPrice: '3,588',
+      discount: '44',
+      perMonth: 'เพียง ฿166.58/เดือน',
+      features: [
+        'เข้าถึงข้อสอบย้อนหลัง 5 ปี',
+        'ระบบวิเคราะห์จุดอ่อน',
+        'คลังข้อสอบส่วนตัว',
+        'อัพเดตข้อสอบใหม่ตลอดปี'
+      ],
+      isPopular: true,
+      planId: 'premium_yearly' as const
+    }
+  ];
+
+  const benefits = [
+    {
+      icon: Archive,
+      title: 'คลังข้อสอบย้อนหลัง 5 ปี',
+      description: 'ข้อสอบราชการ ภาค ก ทุกปี (2561-2566), ข้อสอบ TOEIC ย้อนหลัง 60 ชุด, ข้อสอบ AIS Aptitude Test ครบทุกสายงาน',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-50'
+    },
+    {
+      icon: BarChart3,
+      title: 'ระบบวิเคราะห์ความเชี่ยวชาญ',
+      description: 'วิเคราะห์จุดแข็ง-จุดอ่อน สร้างแบบทดสอบเฉพาะจุดอ่อน และระบบพยากรณ์คะแนนสอบจริง',
+      color: 'text-green-500',
+      bgColor: 'bg-green-50'
+    },
+    {
+      icon: Target,
+      title: 'แบบทดสอบเฉพาะบุคคล',
+      description: 'สร้างแบบทดสอบที่ตรงกับจุดอ่อนของคุณ พร้อมแนะนำคอร์สเรียนเฉพาะบุคคล',
+      color: 'text-orange-500',
+      bgColor: 'bg-orange-50'
+    },
+    {
+      icon: Award,
+      title: 'รายงานความคืบหน้า',
+      description: 'ออกรายงานความคืบหน้าประจำสัปดาห์ ติดตามการพัฒนาอย่างเป็นระบบ',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-50'
+    }
+  ];
+
   return (
     <div className="bg-gradient-to-b from-orange-50 to-white min-h-screen py-12">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            เพิ่มโอกาสสอบผ่าน กพ. ด้วยแผน Premium
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            ปลดล็อกศักยภาพการสอบของคุณ
           </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            ผู้ที่สมัครแผน Premium มีโอกาสสอบผ่านมากกว่า <span className="font-bold text-[#FF5800]">85%</span> เมื่อเทียบกับผู้ที่ไม่ได้ใช้งาน
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
+            เข้าถึงคลังข้อสอบ 5,000+ ข้อ พร้อมระบบวิเคราะห์อัจฉริยะ
+            ที่จะช่วยให้คุณเตรียมตัวสอบได้อย่างมีประสิทธิภาพ
           </p>
-          <div className="mt-4 inline-block bg-yellow-100 px-4 py-2 rounded-full text-sm font-medium text-yellow-800 border border-yellow-300">
+          <div className="inline-block bg-yellow-100 px-6 py-3 rounded-full text-yellow-800 border border-yellow-300">
             <span className="animate-pulse inline-block h-2 w-2 rounded-full bg-yellow-500 mr-2"></span>
-            โปรโมชันพิเศษ! สมัครวันนี้ รับส่วนลด 30% เหลือเพียง 15 ที่สุดท้าย
+            โปรโมชันพิเศษ! สมัครแผนรายปี ประหยัด 44% เหลือเพียง 15 ที่สุดท้าย
           </div>
         </div>
 
         {/* Current Status */}
         {subscription && (
-          <div className="mb-8 text-center">
+          <div className="mb-12 text-center">
             <div className="flex items-center justify-center gap-4 mb-4">
               <Badge 
                 variant={isPremium ? "default" : "secondary"}
-                className={`text-lg px-4 py-2 ${
+                className={`text-lg px-6 py-3 ${
                   isPremium ? 'bg-orange-500' : 'bg-gray-500'
                 }`}
               >
@@ -110,272 +177,120 @@ const SubscriptionPage = () => {
           </div>
         )}
 
-        {/* Debug info for subscription data */}
-        <div className="mb-8 text-center">
-          <details className="inline-block text-left">
-            <summary className="text-sm text-gray-500 cursor-pointer">Debug: Subscription Data</summary>
-            <pre className="text-xs bg-gray-100 p-2 mt-2 rounded">
-              {JSON.stringify({ subscription, isPremium, user: user?.id }, null, 2)}
-            </pre>
-          </details>
+        {/* Pricing Plans */}
+        <div className="mb-20">
+          <h2 className="text-3xl font-bold text-center mb-4">เลือกแพ็กเกจที่เหมาะกับคุณ</h2>
+          <p className="text-gray-600 text-center mb-12">เริ่มต้นการเป็นสมาชิก Premium วันนี้</p>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {plans.map((plan, index) => (
+              <PricingCard
+                key={index}
+                {...plan}
+                onSubscribe={() => {
+                  if (!isPremium) {
+                    createCheckout(plan.planId);
+                  }
+                }}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Main Content - Show PaidSubscriptionForm if not premium */}
-        {!isPremium ? (
-          <div className="mb-12">
-            <PaidSubscriptionForm 
-              onSuccess={() => {
-                toast({
-                  title: 'สำเร็จ!',
-                  description: 'กำลังเปิดหน้าชำระเงิน...',
-                });
-              }}
-            />
+        {/* Benefits Section */}
+        <div className="mb-20">
+          <h2 className="text-3xl font-bold text-center mb-4">สิทธิประโยชน์ Premium</h2>
+          <p className="text-gray-600 text-center mb-12">คุณสมบัติพิเศษที่จะเปลี่ยนวิธีการเตรียมสอบของคุณ</p>
+          
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {benefits.map((benefit, index) => {
+              const IconComponent = benefit.icon;
+              return (
+                <Card key={index} className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className={`${benefit.bgColor} w-16 h-16 rounded-full flex items-center justify-center mb-4`}>
+                      <IconComponent className={`h-8 w-8 ${benefit.color}`} />
+                    </div>
+                    <CardTitle className="text-xl">{benefit.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">{benefit.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-        ) : (
-          <div className="text-center mb-12">
-            <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 max-w-md mx-auto">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-2">
-                  <Crown className="h-8 w-8 text-orange-500" />
-                </div>
-                <CardTitle>คุณเป็นสมาชิก Premium แล้ว</CardTitle>
-                <CardDescription>
-                  ขอบคุณที่เป็นสมาชิก Premium กับเรา
-                </CardDescription>
-              </CardHeader>
-            </Card>
+
+          {/* Analytics Demo */}
+          <div className="max-w-2xl mx-auto">
+            <WeaknessAnalytics />
           </div>
-        )}
-
-        {/* Feature Comparison */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-          {/* Free Plan */}
-          <Card className="relative shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl">Free</CardTitle>
-              <div className="mt-4 mb-6">
-                <span className="text-3xl font-bold">0฿</span>
-                <span className="text-gray-500">/เดือน</span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>ทำข้อสอบ 3 ครั้ง/วิชา/เดือน</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>เข้าถึงข้อสอบพื้นฐาน</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>ดูเฉลยพื้นฐาน</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="h-5 w-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-500">ทำข้อสอบไม่จำกัด</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="h-5 w-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-500">เฉลยละเอียดพร้อมเทคนิค</span>
-                </li>
-              </ul>
-              {!isPremium && (
-                <Badge variant="secondary" className="w-full justify-center py-2">
-                  แผนปัจจุบันของคุณ
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Premium Monthly */}
-          <Card className="relative shadow-xl border-2 border-[#FF5800] scale-105 z-10">
-            <div className="absolute -top-4 left-0 right-0 mx-auto w-max bg-[#FF5800] text-white text-sm font-medium py-1 px-4 rounded-full">
-              แนะนำ
-            </div>
-            <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold p-2 rounded-full transform rotate-12">
-              ลด 30%
-            </div>
-            <CardHeader>
-              <CardTitle className="text-xl">Premium รายเดือน</CardTitle>
-              <div className="mt-4 mb-2">
-                <span className="text-lg text-gray-500 line-through">199฿</span>
-              </div>
-              <div className="mb-6">
-                <span className="text-3xl font-bold">139฿</span>
-                <span className="text-gray-500">/เดือน</span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">ทุกอย่างในแผน Free</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">ทำข้อสอบไม่จำกัด</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">เข้าถึงข้อสอบทั้งหมด</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">เฉลยละเอียดพร้อมเทคนิค</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">วิเคราะห์จุดอ่อน-จุดแข็ง</span>
-                </li>
-              </ul>
-              {isPremium ? (
-                <Badge className="w-full justify-center py-2 bg-orange-500">
-                  แผนปัจจุบันของคุณ
-                </Badge>
-              ) : (
-                <Button 
-                  className="w-full bg-[#FF5800] hover:bg-[#E04E00] font-medium"
-                  onClick={() => createCheckout('premium_monthly')}
-                  disabled={isCreatingCheckout}
-                >
-                  <Zap className="mr-2 h-4 w-4" />
-                  {isCreatingCheckout ? 'กำลังเปิดหน้าชำระเงิน...' : 'เริ่มใช้งาน Premium'}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Premium Yearly */}
-          <Card className="relative shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl">Premium รายปี</CardTitle>
-              <div className="mt-4 mb-2">
-                <span className="text-lg text-gray-500 line-through">2,388฿</span>
-              </div>
-              <div className="mb-6">
-                <span className="text-3xl font-bold">1,390฿</span>
-                <span className="text-gray-500">/ปี</span>
-                <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                  ประหยัด 42%
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>ทุกอย่างในแผน Premium</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>ประหยัดกว่าแบบรายเดือน</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>ใช้งานได้ตลอดปี</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>รับอัปเดตข้อสอบใหม่ฟรี</span>
-                </li>
-              </ul>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => createCheckout('premium_yearly')}
-                disabled={isCreatingCheckout}
-              >
-                {isCreatingCheckout ? 'กำลังเปิดหน้าชำระเงิน...' : 'อัพเกรดเป็นรายปี'}
-              </Button>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Testimonials */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-center mb-8">ผู้ใช้ Premium พูดถึงเรา</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-blue-600 font-bold">ส</span>
-                </div>
-                <div>
-                  <h4 className="font-bold">สมชาย ใจดี</h4>
-                  <p className="text-sm text-gray-500">นักวิชาการพัสดุปฏิบัติการ</p>
-                </div>
+        {/* Guarantee Section */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-12 mb-20 text-center">
+          <h3 className="text-2xl font-bold mb-4">รับประกันความพอใจ</h3>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center">
+              <div className="bg-green-100 p-4 rounded-full mb-4">
+                <Check className="h-8 w-8 text-green-600" />
               </div>
-              <p className="text-gray-600">
-                "หลังจากใช้ Premium ผมสอบผ่านในครั้งแรก! ข้อสอบเสมือนจริงและคำอธิบายละเอียดช่วยให้ผมเข้าใจเนื้อหาได้ดีขึ้นมาก"
-              </p>
-              <div className="mt-3 flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
+              <h4 className="font-semibold mb-2">ยกเลิกได้ทุกเมื่อ</h4>
+              <p className="text-gray-600 text-sm">ไม่มีข้อผูกมัด ยกเลิกได้ตลอดเวลา</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-pink-600 font-bold">ส</span>
-                </div>
-                <div>
-                  <h4 className="font-bold">สุภาพร สวยงาม</h4>
-                  <p className="text-sm text-gray-500">เจ้าพนักงานธุรการ</p>
-                </div>
+            <div className="flex flex-col items-center">
+              <div className="bg-blue-100 p-4 rounded-full mb-4">
+                <RefreshCw className="h-8 w-8 text-blue-600" />
               </div>
-              <p className="text-gray-600">
-                "คุ้มค่ามาก! ระบบวิเคราะห์จุดแข็ง-จุดอ่อนช่วยให้ฉันทราบว่าควรเน้นไปที่วิชาไหน ทำให้การเตรียมตัวมีประสิทธิภาพมากขึ้น"
-              </p>
-              <div className="mt-3 flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
+              <h4 className="font-semibold mb-2">คืนเงินภายใน 14 วัน</h4>
+              <p className="text-gray-600 text-sm">หากไม่พอใจในบริการ</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-green-600 font-bold">ว</span>
-                </div>
-                <div>
-                  <h4 className="font-bold">วิชัย มุ่งมั่น</h4>
-                  <p className="text-sm text-gray-500">นักวิชาการเงินและบัญชี</p>
-                </div>
+            <div className="flex flex-col items-center">
+              <div className="bg-purple-100 p-4 rounded-full mb-4">
+                <Crown className="h-8 w-8 text-purple-600" />
               </div>
-              <p className="text-gray-600">
-                "ลงทุน 139 บาทต่อเดือน แต่ได้เงินเดือนข้าราชการกลับมาหลายหมื่น คุ้มมาก! ขอบคุณที่ช่วยให้ผมสอบผ่าน"
-              </p>
-              <div className="mt-3 flex">
-                {[1, 2, 3, 4].map((star) => (
-                  <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
-                ))}
-                <Star className="h-5 w-5 text-gray-300" />
-              </div>
+              <h4 className="font-semibold mb-2">สิทธิ์เต็มรูปแบบ</h4>
+              <p className="text-gray-600 text-sm">แม้ยกเลิกแล้วจนถึงวันหมดอายุ</p>
             </div>
           </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mb-20">
+          <FAQ />
         </div>
 
         {/* Final CTA */}
         {!isPremium && (
           <div className="text-center">
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-8 rounded-2xl max-w-4xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                เริ่มต้นเตรียมสอบอย่างมืออาชีพวันนี้
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-12 rounded-2xl max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                เริ่มต้นทดลองใช้ฟรี 7 วัน
               </h2>
-              <p className="text-white mb-6 max-w-2xl mx-auto">
-                อย่าปล่อยให้โอกาสในการสอบผ่านหลุดมือ เพียง 139฿ ต่อเดือน คุณจะได้รับเครื่องมือที่ดีที่สุดในการเตรียมสอบ กพ.
+              <p className="text-white mb-8 max-w-2xl mx-auto text-lg">
+                ไม่จำเป็นต้องใช้บัตรเครดิต เข้าถึงคุณสมบัติ Premium ทั้งหมดฟรี 7 วัน
               </p>
-              <Button 
-                className="bg-white text-[#FF5800] hover:bg-gray-100 font-bold py-3 px-8 text-lg"
-                onClick={() => createCheckout('premium_monthly')}
-                disabled={isCreatingCheckout}
-              >
-                เริ่มใช้งาน Premium ตอนนี้
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  className="bg-white text-orange-600 hover:bg-gray-100 font-bold py-4 px-8 text-lg"
+                  onClick={() => createCheckout('premium_yearly')}
+                  disabled={isCreatingCheckout}
+                >
+                  <Crown className="mr-2 h-5 w-5" />
+                  {isCreatingCheckout ? 'กำลังเปิดหน้าชำระเงิน...' : 'เริ่มทดลองใช้ฟรี'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="border-2 border-white text-white hover:bg-white hover:text-orange-600 font-bold py-4 px-8 text-lg"
+                  onClick={() => createCheckout('premium_monthly')}
+                  disabled={isCreatingCheckout}
+                >
+                  สมัครรายเดือน
+                </Button>
+              </div>
+              <p className="text-orange-100 mt-4 text-sm">
+                * ยกเลิกได้ทุกเมื่อก่อนหมดอายุการทดลองใช้
+              </p>
             </div>
           </div>
         )}
