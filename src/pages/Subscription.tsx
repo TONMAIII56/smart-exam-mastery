@@ -17,6 +17,13 @@ const SubscriptionPage = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
+  // Handle authentication redirect in useEffect
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
   useEffect(() => {
     // Handle success/cancel from Stripe
     if (searchParams.get('success') === 'true') {
@@ -37,8 +44,8 @@ const SubscriptionPage = () => {
     }
   }, [searchParams, toast, refreshSubscription]);
 
+  // Show loading or return early if no user
   if (!user) {
-    navigate('/');
     return null;
   }
 
@@ -102,6 +109,16 @@ const SubscriptionPage = () => {
             )}
           </div>
         )}
+
+        {/* Debug info for subscription data */}
+        <div className="mb-8 text-center">
+          <details className="inline-block text-left">
+            <summary className="text-sm text-gray-500 cursor-pointer">Debug: Subscription Data</summary>
+            <pre className="text-xs bg-gray-100 p-2 mt-2 rounded">
+              {JSON.stringify({ subscription, isPremium, user: user?.id }, null, 2)}
+            </pre>
+          </details>
+        </div>
 
         {/* Main Content - Show PaidSubscriptionForm if not premium */}
         {!isPremium ? (
