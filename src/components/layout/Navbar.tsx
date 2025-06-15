@@ -3,12 +3,27 @@ import React from 'react';
 import { Settings, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   const goHome = () => {
     navigate('/');
+  };
+
+  const goToSettings = () => {
+    // Check if user has admin permissions to access admin settings
+    const isAdmin = profile?.admin_role && ['super_admin', 'content_manager', 'moderator'].includes(profile.admin_role);
+    
+    if (isAdmin) {
+      navigate('/admin');
+    } else {
+      // For regular users, we can navigate to a user settings page
+      // For now, we'll show a toast notification
+      console.log('User settings not implemented yet');
+    }
   };
 
   return (
@@ -29,7 +44,7 @@ export const Navbar: React.FC = () => {
               <Home className="mr-2 h-4 w-4" />
               หน้าหลัก
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={goToSettings}>
               <Settings className="mr-2 h-4 w-4" />
               ตั้งค่า
             </Button>
