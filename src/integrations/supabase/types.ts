@@ -9,6 +9,95 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          changed_at: string | null
+          changed_by: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          changed_at?: string | null
+          changed_by?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          changed_at?: string | null
+          changed_by?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_analytics: {
+        Row: {
+          exam_id: string | null
+          id: string
+          metric_type: string
+          metric_value: number | null
+          period_end: string | null
+          period_start: string | null
+          question_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          exam_id?: string | null
+          id?: string
+          metric_type: string
+          metric_value?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          question_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          exam_id?: string | null
+          id?: string
+          metric_type?: string
+          metric_value?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          question_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_analytics_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_analytics_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_attempts: {
         Row: {
           completed: boolean | null
@@ -109,6 +198,44 @@ export type Database = {
           },
         ]
       }
+      exam_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          template_data: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          template_data: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          template_data?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           created_at: string | null
@@ -117,15 +244,20 @@ export type Database = {
           difficulty_level:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          exam_code: string | null
           exam_name: string
           exam_type: Database["public"]["Enums"]["exam_type"]
           id: string
           is_active: boolean | null
           passing_score: number | null
+          premium_only: boolean | null
+          status: Database["public"]["Enums"]["exam_status"] | null
           subject: Database["public"]["Enums"]["subject_type"]
+          tags: string[] | null
           time_limit: number | null
           total_questions: number | null
           updated_at: string | null
+          visibility: string | null
         }
         Insert: {
           created_at?: string | null
@@ -134,15 +266,20 @@ export type Database = {
           difficulty_level?:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          exam_code?: string | null
           exam_name: string
           exam_type: Database["public"]["Enums"]["exam_type"]
           id?: string
           is_active?: boolean | null
           passing_score?: number | null
+          premium_only?: boolean | null
+          status?: Database["public"]["Enums"]["exam_status"] | null
           subject: Database["public"]["Enums"]["subject_type"]
+          tags?: string[] | null
           time_limit?: number | null
           total_questions?: number | null
           updated_at?: string | null
+          visibility?: string | null
         }
         Update: {
           created_at?: string | null
@@ -151,15 +288,20 @@ export type Database = {
           difficulty_level?:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          exam_code?: string | null
           exam_name?: string
           exam_type?: Database["public"]["Enums"]["exam_type"]
           id?: string
           is_active?: boolean | null
           passing_score?: number | null
+          premium_only?: boolean | null
+          status?: Database["public"]["Enums"]["exam_status"] | null
           subject?: Database["public"]["Enums"]["subject_type"]
+          tags?: string[] | null
           time_limit?: number | null
           total_questions?: number | null
           updated_at?: string | null
+          visibility?: string | null
         }
         Relationships: []
       }
@@ -234,6 +376,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"] | null
+          admin_role: Database["public"]["Enums"]["admin_role"] | null
           age: number | null
           created_at: string | null
           education_level: string | null
@@ -256,6 +399,7 @@ export type Database = {
         }
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"] | null
+          admin_role?: Database["public"]["Enums"]["admin_role"] | null
           age?: number | null
           created_at?: string | null
           education_level?: string | null
@@ -278,6 +422,7 @@ export type Database = {
         }
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"] | null
+          admin_role?: Database["public"]["Enums"]["admin_role"] | null
           age?: number | null
           created_at?: string | null
           education_level?: string | null
@@ -300,6 +445,48 @@ export type Database = {
         }
         Relationships: []
       }
+      question_versions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          question_data: Json
+          question_id: string | null
+          version_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          question_data: Json
+          question_id?: string | null
+          version_number: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          question_data?: Json
+          question_id?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_versions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           created_at: string | null
@@ -314,7 +501,10 @@ export type Database = {
           question_text: string
           question_type: Database["public"]["Enums"]["question_type"] | null
           score: number | null
+          status: Database["public"]["Enums"]["question_status"] | null
+          tags: string[] | null
           updated_at: string | null
+          version: number | null
         }
         Insert: {
           created_at?: string | null
@@ -329,7 +519,10 @@ export type Database = {
           question_text: string
           question_type?: Database["public"]["Enums"]["question_type"] | null
           score?: number | null
+          status?: Database["public"]["Enums"]["question_status"] | null
+          tags?: string[] | null
           updated_at?: string | null
+          version?: number | null
         }
         Update: {
           created_at?: string | null
@@ -344,7 +537,10 @@ export type Database = {
           question_text?: string
           question_type?: Database["public"]["Enums"]["question_type"] | null
           score?: number | null
+          status?: Database["public"]["Enums"]["question_status"] | null
+          tags?: string[] | null
           updated_at?: string | null
+          version?: number | null
         }
         Relationships: [
           {
@@ -511,6 +707,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_admin_permission: {
+        Args: { required_role: Database["public"]["Enums"]["admin_role"] }
+        Returns: boolean
+      }
       check_exam_quota: {
         Args: { p_user_id: string; p_exam_type: string; p_subject: string }
         Returns: boolean
@@ -524,6 +724,16 @@ export type Database = {
           expires_at: string
         }[]
       }
+      create_audit_log: {
+        Args: {
+          p_table_name: string
+          p_record_id: string
+          p_action: string
+          p_old_values?: Json
+          p_new_values?: Json
+        }
+        Returns: string
+      }
       update_usage_tracking: {
         Args: { p_user_id: string; p_exam_type: string; p_subject: string }
         Returns: undefined
@@ -531,9 +741,12 @@ export type Database = {
     }
     Enums: {
       account_status: "active" | "inactive" | "suspended"
+      admin_role: "super_admin" | "content_manager" | "moderator"
       difficulty_level: "easy" | "medium" | "hard"
+      exam_status: "draft" | "review" | "published" | "archived"
       exam_type: "civil-service" | "toeic" | "aisa"
       pass_status: "pass" | "fail"
+      question_status: "draft" | "review" | "published" | "archived"
       question_type: "multiple_choice" | "true_false" | "fill_in_blank"
       subject_type:
         | "general-knowledge"
@@ -665,9 +878,12 @@ export const Constants = {
   public: {
     Enums: {
       account_status: ["active", "inactive", "suspended"],
+      admin_role: ["super_admin", "content_manager", "moderator"],
       difficulty_level: ["easy", "medium", "hard"],
+      exam_status: ["draft", "review", "published", "archived"],
       exam_type: ["civil-service", "toeic", "aisa"],
       pass_status: ["pass", "fail"],
+      question_status: ["draft", "review", "published", "archived"],
       question_type: ["multiple_choice", "true_false", "fill_in_blank"],
       subject_type: [
         "general-knowledge",
