@@ -7,7 +7,11 @@ import { SampleQuestion } from '@/components/landing/SampleQuestion';
 import { Testimonials } from '@/components/landing/Testimonials';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { BeforeAfterComparison } from '@/components/landing/BeforeAfterComparison';
-import { CtaSection } from '@/components/landing/CtaSection';
+import { PremiumPlans } from '@/components/landing/PremiumPlans';
+import { AnalyticsDashboard } from '@/components/landing/AnalyticsDashboard';
+import { FAQ } from '@/components/subscription/FAQ';
+import { SatisfactionGuarantee } from '@/components/landing/SatisfactionGuarantee';
+import { FinalCTA } from '@/components/landing/FinalCTA';
 import { Footer } from '@/components/landing/Footer';
 import { LandingNavbar } from '@/components/landing/LandingNavbar';
 
@@ -22,7 +26,13 @@ const LandingPage: React.FC = () => {
       <BeforeAfterComparison />
       <SampleQuestion />
       <Testimonials />
-      <CtaSection />
+      <PremiumPlans />
+      <AnalyticsDashboard />
+      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <FAQ />
+      </div>
+      <SatisfactionGuarantee />
+      <FinalCTA />
       <Footer />
     </div>
   );
