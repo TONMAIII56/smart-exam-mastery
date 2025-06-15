@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,20 +11,26 @@ import { useToast } from '@/hooks/use-toast';
 import { PricingCard } from '@/components/subscription/PricingCard';
 import { WeaknessAnalytics } from '@/components/subscription/WeaknessAnalytics';
 import { FAQ } from '@/components/subscription/FAQ';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const SubscriptionPage = () => {
   const { subscription, isPremium, createCheckout, openCustomerPortal, isCreatingCheckout, isOpeningPortal, refreshSubscription } = useSubscription();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Handle authentication redirect in useEffect
+  // Handle initialization and authentication check
   useEffect(() => {
+    if (authLoading) return; // Still loading auth state
+    
+    setIsInitialized(true);
+    
     if (!user) {
-      navigate('/');
+      navigate('/', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     // Handle success/cancel from Stripe
@@ -46,7 +52,27 @@ const SubscriptionPage = () => {
     }
   }, [searchParams, toast, refreshSubscription]);
 
-  // Show loading or return early if no user
+  // Show loading skeleton while auth is loading
+  if (authLoading || !isInitialized) {
+    return (
+      <div className="bg-gradient-to-b from-orange-50 to-white min-h-screen py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <Skeleton className="h-12 w-96 mx-auto mb-6" />
+            <Skeleton className="h-6 w-full max-w-4xl mx-auto mb-4" />
+            <Skeleton className="h-6 w-full max-w-3xl mx-auto mb-8" />
+            <Skeleton className="h-12 w-64 mx-auto" />
+          </div>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Return null if no user (will redirect)
   if (!user) {
     return null;
   }
