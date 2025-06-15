@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Hero } from '@/components/landing/Hero';
+import { TrustSignals } from '@/components/landing/TrustSignals';
 import { Features } from '@/components/landing/Features';
 import { SampleQuestion } from '@/components/landing/SampleQuestion';
 import { Testimonials } from '@/components/landing/Testimonials';
@@ -14,6 +15,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <LandingNavbar />
       <Hero />
+      <TrustSignals />
       <Features />
       <SampleQuestion />
       <Testimonials />
