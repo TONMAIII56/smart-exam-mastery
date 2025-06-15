@@ -21,43 +21,55 @@ export const useSubscription = () => {
     queryFn: async (): Promise<SubscriptionInfo> => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      const { data, error } = await supabase.rpc('check_user_subscription', {
-        user_id: user.id
-      });
+      const { data, error } = await supabase.functions.invoke('check-subscription');
       
       if (error) throw error;
-      return data[0] as SubscriptionInfo;
+      return data as SubscriptionInfo;
     },
     enabled: !!user?.id,
   });
 
-  const upgradeToPremiuMutation = useMutation({
-    mutationFn: async () => {
+  const createCheckoutMutation = useMutation({
+    mutationFn: async (plan: 'premium_monthly' | 'premium_yearly') => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      const { error } = await supabase
-        .from('subscriptions')
-        .upsert({
-          user_id: user.id,
-          plan: 'premium',
-          status: 'active',
-          current_period_start: new Date().toISOString(),
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        });
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan }
+      });
       
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', user?.id] });
-      toast({
-        title: 'อัพเกรดสำเร็จ!',
-        description: 'คุณได้อัพเกรดเป็นสมาชิก Premium แล้ว',
-      });
+    onSuccess: (data) => {
+      // Open Stripe checkout in a new tab
+      window.open(data.url, '_blank');
     },
     onError: (error) => {
       toast({
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถอัพเกรดได้ กรุณาลองใหม่อีกครั้ง',
+        description: 'ไม่สามารถสร้างลิงค์ชำระเงินได้ กรุณาลองใหม่อีกครั้ง',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const openCustomerPortalMutation = useMutation({
+    mutationFn: async () => {
+      if (!user?.id) throw new Error('User not authenticated');
+      
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      // Open customer portal in a new tab
+      window.open(data.url, '_blank');
+    },
+    onError: (error) => {
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถเปิดหน้าจัดการสมาชิกได้ กรุณาลองใหม่อีกครั้ง',
         variant: 'destructive',
       });
     },
@@ -92,12 +104,20 @@ export const useSubscription = () => {
     },
   });
 
+  const refreshSubscription = () => {
+    queryClient.invalidateQueries({ queryKey: ['subscription', user?.id] });
+  };
+
   return {
     subscription,
     isLoading,
     isPremium: subscription?.is_premium || false,
-    upgradeToPremiuMutation,
+    createCheckout: createCheckoutMutation.mutate,
+    openCustomerPortal: openCustomerPortalMutation.mutate,
+    isCreatingCheckout: createCheckoutMutation.isPending,
+    isOpeningPortal: openCustomerPortalMutation.isPending,
     checkExamQuota: checkExamQuotaMutation.mutateAsync,
     updateUsage: updateUsageMutation.mutateAsync,
+    refreshSubscription,
   };
 };

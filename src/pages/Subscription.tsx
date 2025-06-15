@@ -1,17 +1,40 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Check, X, Zap, Star } from 'lucide-react';
+import { Crown, Check, X, Zap, Star, Settings, RefreshCw } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const SubscriptionPage = () => {
-  const { subscription, isPremium, upgradeToPremiuMutation } = useSubscription();
+  const { subscription, isPremium, createCheckout, openCustomerPortal, isCreatingCheckout, isOpeningPortal, refreshSubscription } = useSubscription();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Handle success/cancel from Stripe
+    if (searchParams.get('success') === 'true') {
+      toast({
+        title: 'ชำระเงินสำเร็จ!',
+        description: 'คุณได้อัพเกรดเป็นสมาชิก Premium แล้ว กำลังอัพเดตข้อมูล...',
+      });
+      // Refresh subscription after a short delay
+      setTimeout(() => {
+        refreshSubscription();
+      }, 2000);
+    } else if (searchParams.get('canceled') === 'true') {
+      toast({
+        title: 'ยกเลิกการชำระเงิน',
+        description: 'คุณสามารถสมัครสมาชิกได้ทุกเมื่อ',
+        variant: 'destructive',
+      });
+    }
+  }, [searchParams, toast, refreshSubscription]);
 
   if (!user) {
     navigate('/');
@@ -38,21 +61,44 @@ const SubscriptionPage = () => {
         {/* Current Status */}
         {subscription && (
           <div className="mb-8 text-center">
-            <Badge 
-              variant={isPremium ? "default" : "secondary"}
-              className={`text-lg px-4 py-2 ${
-                isPremium ? 'bg-orange-500' : 'bg-gray-500'
-              }`}
-            >
-              {isPremium ? (
-                <>
-                  <Crown className="mr-2 h-5 w-5" />
-                  Premium Member
-                </>
-              ) : (
-                'Free Member'
-              )}
-            </Badge>
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <Badge 
+                variant={isPremium ? "default" : "secondary"}
+                className={`text-lg px-4 py-2 ${
+                  isPremium ? 'bg-orange-500' : 'bg-gray-500'
+                }`}
+              >
+                {isPremium ? (
+                  <>
+                    <Crown className="mr-2 h-5 w-5" />
+                    Premium Member
+                  </>
+                ) : (
+                  'Free Member'
+                )}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshSubscription}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                อัพเดตสถานะ
+              </Button>
+            </div>
+            
+            {isPremium && (
+              <div className="flex justify-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={openCustomerPortal}
+                  disabled={isOpeningPortal}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  {isOpeningPortal ? 'กำลังเปิด...' : 'จัดการสมาชิก'}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
@@ -111,7 +157,7 @@ const SubscriptionPage = () => {
               ลด 30%
             </div>
             <CardHeader>
-              <CardTitle className="text-xl">Premium</CardTitle>
+              <CardTitle className="text-xl">Premium รายเดือน</CardTitle>
               <div className="mt-4 mb-2">
                 <span className="text-lg text-gray-500 line-through">199฿</span>
               </div>
@@ -155,11 +201,11 @@ const SubscriptionPage = () => {
                 <>
                   <Button 
                     className="w-full bg-[#FF5800] hover:bg-[#E04E00] font-medium"
-                    onClick={() => upgradeToPremiuMutation.mutate()}
-                    disabled={upgradeToPremiuMutation.isPending}
+                    onClick={() => createCheckout('premium_monthly')}
+                    disabled={isCreatingCheckout}
                   >
                     <Zap className="mr-2 h-4 w-4" />
-                    {upgradeToPremiuMutation.isPending ? 'กำลังอัพเกรด...' : 'เริ่มใช้งาน Premium'}
+                    {isCreatingCheckout ? 'กำลังเปิดหน้าชำระเงิน...' : 'เริ่มใช้งาน Premium'}
                   </Button>
                   <p className="text-center text-sm text-gray-500">
                     ยกเลิกได้ทุกเมื่อ ไม่มีข้อผูกมัด
@@ -203,8 +249,13 @@ const SubscriptionPage = () => {
                   <span>รับอัปเดตข้อสอบใหม่ฟรี</span>
                 </li>
               </ul>
-              <Button variant="outline" className="w-full">
-                อัพเกรดเป็นรายปี
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => createCheckout('premium_yearly')}
+                disabled={isCreatingCheckout}
+              >
+                {isCreatingCheckout ? 'กำลังเปิดหน้าชำระเงิน...' : 'อัพเกรดเป็นรายปี'}
               </Button>
             </CardContent>
           </Card>
