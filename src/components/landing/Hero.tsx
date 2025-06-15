@@ -11,8 +11,11 @@ export const Hero: React.FC = () => {
     navigate('/quiz-selection');
   };
 
-  const viewPremiumPlans = () => {
-    navigate('/subscription');
+  const scrollToPremiumPlans = () => {
+    const premiumSection = document.querySelector('[data-section="premium-plans"]');
+    if (premiumSection) {
+      premiumSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -122,7 +125,7 @@ export const Hero: React.FC = () => {
               🚀 ทดลองฟรี 7 วัน
             </Button>
             <Button 
-              onClick={viewPremiumPlans}
+              onClick={scrollToPremiumPlans}
               variant="outline"
               size="lg"
               className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm py-6 px-12 rounded-xl font-semibold text-xl transition-all duration-300"
