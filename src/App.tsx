@@ -8,7 +8,9 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import QuizSelection from "./pages/QuizSelection";
+import ExamSelection from "./pages/ExamSelection";
 import Quiz from "./pages/Quiz";
+import Exam from "./pages/Exam";
 import QuizResults from "./pages/QuizResults";
 import Subscription from "./pages/Subscription";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -27,7 +29,9 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Index />} />
             <Route path="/quiz-selection" element={<QuizSelection />} />
+            <Route path="/exam-selection" element={<ExamSelection />} />
             <Route path="/quiz" element={<Quiz />} />
+            <Route path="/exam/:id" element={<Exam />} />
             <Route path="/quiz-results" element={<QuizResults />} />
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/admin" element={<AdminDashboard />} />
