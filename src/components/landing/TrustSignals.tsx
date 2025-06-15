@@ -28,23 +28,14 @@ export const TrustSignals: React.FC = () => {
     {
       icon: Users,
       title: 'ชุมชนผู้เรียน',
-      description: 'เข้าร่วมกับผู้เรียนกว่า 50,000 คนทั่วประเทศ',
+      description: 'เข้าร่วมกับผู้เรียนกว่า 2,500 คนทั่วประเทศ',
       color: 'text-orange-500',
       bgColor: 'bg-orange-50'
     }
   ];
 
-  const organizations = [
-    { name: 'กระทรวงการคลัง', logo: '🏛️' },
-    { name: 'กรมสรรพากร', logo: '📊' },
-    { name: 'ธนาคารกรุงไทย', logo: '🏦' },
-    { name: 'บริษัท ปตท.', logo: '⛽' },
-    { name: 'จุฬาลงกรณ์มหาวิทยาลัย', logo: '🎓' },
-    { name: 'มหาวิทยาลัยเกษตรศาสตร์', logo: '🌱' }
-  ];
-
   const achievements = [
-    { metric: '50,000+', label: 'ผู้ใช้งานทั่วประเทศ' },
+    { metric: '2,500+', label: 'ผู้ใช้งานทั่วประเทศ' },
     { metric: '92%', label: 'อัตราสอบผ่าน' },
     { metric: '15,000+', label: 'ข้อสอบในระบบ' },
     { metric: '4.9/5', label: 'คะแนนความพึงพอใจ' }
@@ -66,23 +57,6 @@ export const TrustSignals: React.FC = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             ไว้วางใจโดยหน่วยงานราชการ องค์กรเอกชน และสถาบันการศึกษาชั้นนำทั่วประเทศ
           </p>
-        </div>
-
-        {/* Organizations Trust */}
-        <div className="mb-16">
-          <h3 className="text-lg font-medium text-gray-500 text-center mb-8">ใช้งานโดยผู้สอบจากหน่วยงานเหล่านี้</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-            {organizations.map((org, index) => (
-              <div key={index} className="flex flex-col items-center group">
-                <div className="text-4xl mb-2 transform group-hover:scale-110 transition-transform duration-300">
-                  {org.logo}
-                </div>
-                <span className="text-sm text-gray-600 text-center font-medium">
-                  {org.name}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Trust Badges */}
@@ -138,8 +112,8 @@ export const TrustSignals: React.FC = () => {
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-8 w-8 text-blue-600" />
             </div>
-            <h4 className="text-xl font-bold text-gray-900 mb-3">รับประกันผลลัพธ์</h4>
-            <p className="text-gray-600">เพิ่มคะแนนสอบอย่างน้อย 30% หรือคืนเงิน 100% ภายใน 30 วัน</p>
+            <h4 className="text-xl font-bold text-gray-900 mb-3">รับประกันความพึงพอใจ</h4>
+            <p className="text-gray-600">หากไม่พึงพอใจ คืนเงิน 100% ภายใน 30 วัน</p>
           </div>
 
           <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-purple-100 text-center">

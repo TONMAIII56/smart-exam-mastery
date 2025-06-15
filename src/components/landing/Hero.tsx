@@ -50,7 +50,7 @@ export const Hero = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-purple-500" />
-                <span>ผู้ใช้ 50,000+ คน</span>
+                <span>ผู้ใช้ 2,500+ คน</span>
               </div>
             </div>
 
@@ -127,7 +127,7 @@ export const Hero = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">ผู้ใช้งานแล้ว</p>
-                    <p className="font-bold text-lg text-gray-900">50,000+</p>
+                    <p className="font-bold text-lg text-gray-900">2,500+</p>
                   </div>
                 </div>
               </div>
@@ -150,7 +150,7 @@ export const Hero = () => {
         {/* Bottom stats section */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-20 max-w-5xl mx-auto">
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/50 text-center hover:shadow-xl transition-shadow duration-300">
-            <div className="text-3xl font-bold text-orange-500 mb-2">50,000+</div>
+            <div className="text-3xl font-bold text-orange-500 mb-2">2,500+</div>
             <div className="text-gray-600 font-medium">ผู้ใช้งานทั่วประเทศ</div>
           </div>
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/50 text-center hover:shadow-xl transition-shadow duration-300">
