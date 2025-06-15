@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, ArrowRight, Users, Award, TrendingUp, Clock, Target, Zap } from 'lucide-react';
+import { ArrowRight, Users, Award, TrendingUp, Clock, Target, Zap, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Hero: React.FC = () => {
@@ -35,47 +35,39 @@ export const Hero: React.FC = () => {
             <span className="text-orange-700 font-semibold">2,500+ คนใช้และสอบผ่าน ก.พ. แล้ว</span>
           </div>
 
-          {/* Main Headline */}
+          {/* Main Headline - Updated according to new structure */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
             <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-              สอบ ก.พ. ให้ผ่านใน 60 วัน
+              สอบ ก.พ. สำเร็จภายใน 60 วัน
             </span>
             <br />
-            <span className="text-white">ด้วยระบบฝึกแบบอัจฉริยะ</span>
+            <span className="text-white">ระบบฝึกแบบอัจฉริยะ</span>
           </h1>
 
-          {/* Subtitle */}
+          {/* Updated Subtitle */}
           <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto leading-relaxed">
-            ระบบฝึกข้อสอบ + วิเคราะห์จุดอ่อนแบบ AI 
+            รวม AI วิเคราะห์จุดอ่อน–แข็ง + เทคนิคจำเร็ว สร้างผลลัพธ์จริง
             <br className="hidden md:block" />
-            พร้อมเทคนิคจำเร็วที่เข้าใจง่าย
+            พร้อมเทคนิคและการวิเคราะห์ส่วนบุคคลครบชุด
           </p>
 
-          {/* Key Benefits */}
+          {/* Key Benefits with updated content */}
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 mb-8 max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="flex items-center gap-3 text-white">
-                <div className="bg-green-500 p-1 rounded-full">
-                  <span className="text-white text-sm">✅</span>
-                </div>
+                <CheckCircle className="h-5 w-5 text-green-400" />
                 <span className="font-medium">ฝึกผ่านระบบ AI วิเคราะห์จุดอ่อนเฉพาะบุคคล</span>
               </div>
               <div className="flex items-center gap-3 text-white">
-                <div className="bg-green-500 p-1 rounded-full">
-                  <span className="text-white text-sm">✅</span>
-                </div>
+                <CheckCircle className="h-5 w-5 text-green-400" />
                 <span className="font-medium">เนื้อหาครบทุกหมวดของ ก.พ. พร้อมแนวข้อสอบจริง</span>
               </div>
               <div className="flex items-center gap-3 text-white">
-                <div className="bg-green-500 p-1 rounded-full">
-                  <span className="text-white text-sm">✅</span>
-                </div>
+                <CheckCircle className="h-5 w-5 text-green-400" />
                 <span className="font-medium">เทคนิคจำเร็ว + กลยุทธ์สอบผ่านรอบเดียว</span>
               </div>
               <div className="flex items-center gap-3 text-white">
-                <div className="bg-green-500 p-1 rounded-full">
-                  <span className="text-white text-sm">✅</span>
-                </div>
+                <CheckCircle className="h-5 w-5 text-green-400" />
                 <span className="font-medium">ระบบวัดผลและปรับแผนการเรียนแบบอัจฉริยะ</span>
               </div>
             </div>
@@ -98,7 +90,7 @@ export const Hero: React.FC = () => {
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div className="text-left">
-                <p className="text-2xl font-bold text-white">85%</p>
+                <p className="text-2xl font-bold text-white">97%</p>
                 <p className="text-blue-200">อัตราการสอบผ่าน</p>
               </div>
             </div>
@@ -114,7 +106,7 @@ export const Hero: React.FC = () => {
             </div>
           </div>
 
-          {/* CTA Buttons */}
+          {/* Updated CTA Buttons according to new structure */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <Button 
               onClick={startFreeTrial}
@@ -122,7 +114,7 @@ export const Hero: React.FC = () => {
               className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-6 px-12 rounded-xl text-xl transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 border-2 border-orange-400"
             >
               <Zap className="mr-3 h-7 w-7" />
-              🚀 ทดลองฟรี 7 วัน
+              ทดลองใช้ฟรี 7 วัน
             </Button>
             <Button 
               onClick={scrollToPremiumPlans}
@@ -130,7 +122,7 @@ export const Hero: React.FC = () => {
               size="lg"
               className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm py-6 px-12 rounded-xl font-semibold text-xl transition-all duration-300"
             >
-              ดูแผน Premium
+              ดู Premium Plan
               <ArrowRight className="ml-3 h-7 w-7" />
             </Button>
           </div>

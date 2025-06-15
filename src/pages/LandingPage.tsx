@@ -2,7 +2,9 @@
 import React from 'react';
 import { Hero } from '@/components/landing/Hero';
 import { TrustSignals } from '@/components/landing/TrustSignals';
+import { PlansOverview } from '@/components/landing/PlansOverview';
 import { Features } from '@/components/landing/Features';
+import { InteractiveQuiz } from '@/components/landing/InteractiveQuiz';
 import { SampleQuestion } from '@/components/landing/SampleQuestion';
 import { Testimonials } from '@/components/landing/Testimonials';
 import { HowItWorks } from '@/components/landing/HowItWorks';
@@ -21,8 +23,10 @@ const LandingPage: React.FC = () => {
       <LandingNavbar />
       <Hero />
       <TrustSignals />
-      <HowItWorks />
+      <PlansOverview />
       <Features />
+      <InteractiveQuiz />
+      <HowItWorks />
       <BeforeAfterComparison />
       <SampleQuestion />
       <Testimonials />
