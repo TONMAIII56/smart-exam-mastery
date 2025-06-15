@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -91,7 +90,7 @@ const SubscriptionPage = () => {
               <div className="flex justify-center gap-2">
                 <Button
                   variant="outline"
-                  onClick={openCustomerPortal}
+                  onClick={() => openCustomerPortal()}
                   disabled={isOpeningPortal}
                 >
                   <Settings className="mr-2 h-4 w-4" />
@@ -376,8 +375,8 @@ const SubscriptionPage = () => {
             </div>
             <Button 
               className="bg-white text-[#FF5800] hover:bg-gray-100 font-bold py-3 px-8 text-lg"
-              onClick={() => !isPremium && upgradeToPremiuMutation.mutate()}
-              disabled={upgradeToPremiuMutation.isPending || isPremium}
+              onClick={() => !isPremium && createCheckout('premium_monthly')}
+              disabled={isCreatingCheckout || isPremium}
             >
               {isPremium ? 'คุณเป็นสมาชิก Premium แล้ว' : 'เริ่มใช้งาน Premium ตอนนี้'}
             </Button>
