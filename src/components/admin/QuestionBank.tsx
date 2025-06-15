@@ -10,14 +10,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, Edit, Eye, Archive, Clone, History } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Archive, Copy, History } from 'lucide-react';
 import QuestionForm from './QuestionForm';
 import QuestionVersions from './QuestionVersions';
 
+type QuestionStatus = 'draft' | 'review' | 'published' | 'archived';
+type DifficultyLevel = 'easy' | 'medium' | 'hard';
+
 const QuestionBank = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | QuestionStatus>('all');
+  const [difficultyFilter, setDifficultyFilter] = useState<'all' | DifficultyLevel>('all');
   const [examFilter, setExamFilter] = useState('all');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -68,7 +71,7 @@ const QuestionBank = () => {
   });
 
   const updateQuestionStatus = useMutation({
-    mutationFn: async ({ questionId, status }: { questionId: string; status: string }) => {
+    mutationFn: async ({ questionId, status }: { questionId: string; status: QuestionStatus }) => {
       const { error } = await supabase
         .from('questions')
         .update({ status, updated_at: new Date().toISOString() })
@@ -97,14 +100,14 @@ const QuestionBank = () => {
 
       const { data: newQuestion, error: createError } = await supabase
         .from('questions')
-        .insert({
+        .insert([{
           ...originalQuestion,
           id: undefined,
           question_text: `${originalQuestion.question_text} (Copy)`,
-          status: 'draft',
+          status: 'draft' as QuestionStatus,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        })
+        }])
         .select()
         .single();
 
@@ -183,7 +186,7 @@ const QuestionBank = () => {
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value: 'all' | QuestionStatus) => setStatusFilter(value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -195,7 +198,7 @@ const QuestionBank = () => {
                 <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+            <Select value={difficultyFilter} onValueChange={(value: 'all' | DifficultyLevel) => setDifficultyFilter(value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
@@ -303,11 +306,11 @@ const QuestionBank = () => {
                           variant="ghost"
                           onClick={() => cloneQuestion.mutate(question.id)}
                         >
-                          <Clone className="h-4 w-4" />
+                          <Copy className="h-4 w-4" />
                         </Button>
                         <Select
                           value={question.status}
-                          onValueChange={(status) => updateQuestionStatus.mutate({ questionId: question.id, status })}
+                          onValueChange={(status: QuestionStatus) => updateQuestionStatus.mutate({ questionId: question.id, status })}
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />

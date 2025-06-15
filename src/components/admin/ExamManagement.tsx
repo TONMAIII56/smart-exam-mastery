@@ -10,14 +10,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Edit, Eye, Archive, Clone, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Archive, Copy, Filter } from 'lucide-react';
 import ExamForm from './ExamForm';
 import ExamPreview from './ExamPreview';
 
+type ExamStatus = 'draft' | 'review' | 'published' | 'archived';
+type ExamType = 'civil-service' | 'toeic' | 'aisa';
+
 const ExamManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | ExamStatus>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | ExamType>('all');
   const [selectedExam, setSelectedExam] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -51,7 +54,7 @@ const ExamManagement = () => {
   });
 
   const updateExamStatus = useMutation({
-    mutationFn: async ({ examId, status }: { examId: string; status: string }) => {
+    mutationFn: async ({ examId, status }: { examId: string; status: ExamStatus }) => {
       const { error } = await supabase
         .from('exams')
         .update({ status, updated_at: new Date().toISOString() })
@@ -89,14 +92,14 @@ const ExamManagement = () => {
       // Create new exam
       const { data: newExam, error: createError } = await supabase
         .from('exams')
-        .insert({
+        .insert([{
           ...originalExam,
           id: undefined,
           exam_name: `${originalExam.exam_name} (Copy)`,
-          status: 'draft',
+          status: 'draft' as ExamStatus,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        })
+        }])
         .select()
         .single();
 
@@ -113,13 +116,13 @@ const ExamManagement = () => {
       for (const question of questions) {
         const { data: newQuestion, error: questionError } = await supabase
           .from('questions')
-          .insert({
+          .insert([{
             ...question,
             id: undefined,
             exam_id: newExam.id,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          })
+          }])
           .select()
           .single();
 
@@ -206,7 +209,7 @@ const ExamManagement = () => {
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value: 'all' | ExamStatus) => setStatusFilter(value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -218,7 +221,7 @@ const ExamManagement = () => {
                 <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={(value: 'all' | ExamType) => setTypeFilter(value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -298,11 +301,11 @@ const ExamManagement = () => {
                           variant="ghost"
                           onClick={() => cloneExam.mutate(exam.id)}
                         >
-                          <Clone className="h-4 w-4" />
+                          <Copy className="h-4 w-4" />
                         </Button>
                         <Select
                           value={exam.status}
-                          onValueChange={(status) => updateExamStatus.mutate({ examId: exam.id, status })}
+                          onValueChange={(status: ExamStatus) => updateExamStatus.mutate({ examId: exam.id, status })}
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />

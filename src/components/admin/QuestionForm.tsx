@@ -27,16 +27,20 @@ interface Option {
   option_image?: string;
 }
 
+type DifficultyLevel = 'easy' | 'medium' | 'hard';
+type QuestionType = 'multiple_choice' | 'true_false' | 'fill_in_blank';
+type QuestionStatus = 'draft' | 'review' | 'published' | 'archived';
+
 const QuestionForm: React.FC<QuestionFormProps> = ({ question, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     exam_id: '',
     question_text: '',
-    question_type: 'multiple_choice',
-    difficulty_level: 'medium',
+    question_type: 'multiple_choice' as QuestionType,
+    difficulty_level: 'medium' as DifficultyLevel,
     score: 1,
     explanation: '',
     question_image: '',
-    status: 'draft'
+    status: 'draft' as QuestionStatus
   });
   const [options, setOptions] = useState<Option[]>([
     { option_text: '', is_correct: false },
@@ -191,23 +195,25 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ question, onSuccess, onCanc
         
         if (error) throw error;
 
-        // Create version entry
+        // Create version entry with proper JSON data
+        const versionData = {
+          question_text: question.question_text,
+          options: options.filter(opt => opt.option_text.trim())
+        };
+
         await supabase
           .from('question_versions')
-          .insert({
+          .insert([{
             question_id: question.id,
             version_number: question.version || 1,
-            question_data: {
-              question_text: question.question_text,
-              options: options.filter(opt => opt.option_text.trim())
-            },
+            question_data: versionData as any,
             created_by: user?.id
-          });
+          }]);
       } else {
         // Create new question
         const { data: newQuestion, error } = await supabase
           .from('questions')
-          .insert(questionData)
+          .insert([questionData])
           .select()
           .single();
         
@@ -283,7 +289,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ question, onSuccess, onCanc
 
           <div>
             <Label htmlFor="question_type">Question Type</Label>
-            <Select value={formData.question_type} onValueChange={(value) => setFormData({ ...formData, question_type: value })}>
+            <Select value={formData.question_type} onValueChange={(value: QuestionType) => setFormData({ ...formData, question_type: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -297,7 +303,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ question, onSuccess, onCanc
 
           <div>
             <Label htmlFor="difficulty_level">Difficulty Level</Label>
-            <Select value={formData.difficulty_level} onValueChange={(value) => setFormData({ ...formData, difficulty_level: value })}>
+            <Select value={formData.difficulty_level} onValueChange={(value: DifficultyLevel) => setFormData({ ...formData, difficulty_level: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -324,7 +330,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ question, onSuccess, onCanc
 
           <div>
             <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+            <Select value={formData.status} onValueChange={(value: QuestionStatus) => setFormData({ ...formData, status: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

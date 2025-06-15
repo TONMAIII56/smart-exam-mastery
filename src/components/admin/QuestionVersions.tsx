@@ -157,11 +157,11 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(version.created_at).toLocaleString('th-TH')}</span>
                   </div>
-                  {version.profiles && (
+                  {Array.isArray(version.profiles) && version.profiles.length > 0 && (
                     <div className="flex items-center space-x-1">
                       <User className="h-4 w-4" />
                       <span>
-                        {version.profiles.first_name} {version.profiles.last_name}
+                        {version.profiles[0].first_name} {version.profiles[0].last_name}
                       </span>
                     </div>
                   )}

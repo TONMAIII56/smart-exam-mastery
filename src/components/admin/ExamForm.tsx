@@ -19,20 +19,24 @@ interface ExamFormProps {
   onCancel: () => void;
 }
 
+type DifficultyLevel = 'easy' | 'medium' | 'hard';
+type ExamType = 'civil-service' | 'toeic' | 'aisa';
+type ExamStatus = 'draft' | 'review' | 'published' | 'archived';
+
 const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     exam_name: '',
     description: '',
-    exam_type: '',
+    exam_type: 'civil-service' as ExamType,
     subject: '',
     time_limit: '',
     passing_score: '',
-    difficulty_level: 'medium',
+    difficulty_level: 'medium' as DifficultyLevel,
     premium_only: false,
     visibility: 'public',
     exam_code: '',
     tags: '',
-    status: 'draft'
+    status: 'draft' as ExamStatus
   });
   const [isLoading, setIsLoading] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -45,7 +49,7 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
       setFormData({
         exam_name: exam.exam_name || '',
         description: exam.description || '',
-        exam_type: exam.exam_type || '',
+        exam_type: exam.exam_type || 'civil-service',
         subject: exam.subject || '',
         time_limit: exam.time_limit?.toString() || '',
         passing_score: exam.passing_score?.toString() || '',
@@ -92,7 +96,7 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
       } else {
         const { error } = await supabase
           .from('exams')
-          .insert(examData);
+          .insert([examData]);
         
         if (error) throw error;
       }
@@ -159,7 +163,7 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
 
           <div>
             <Label htmlFor="exam_type">Exam Type *</Label>
-            <Select value={formData.exam_type} onValueChange={(value) => setFormData({ ...formData, exam_type: value })}>
+            <Select value={formData.exam_type} onValueChange={(value: ExamType) => setFormData({ ...formData, exam_type: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select exam type" />
               </SelectTrigger>
@@ -194,7 +198,7 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
 
           <div>
             <Label htmlFor="difficulty_level">Difficulty Level</Label>
-            <Select value={formData.difficulty_level} onValueChange={(value) => setFormData({ ...formData, difficulty_level: value })}>
+            <Select value={formData.difficulty_level} onValueChange={(value: DifficultyLevel) => setFormData({ ...formData, difficulty_level: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -233,7 +237,7 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
 
           <div>
             <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+            <Select value={formData.status} onValueChange={(value: ExamStatus) => setFormData({ ...formData, status: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
