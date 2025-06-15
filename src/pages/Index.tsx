@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { Dashboard } from '@/components/dashboard/Dashboard';
+import Dashboard from '@/components/dashboard/Dashboard';
 
 const Index: React.FC = () => {
   return (
