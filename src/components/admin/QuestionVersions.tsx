@@ -13,6 +13,11 @@ interface QuestionVersionsProps {
   onClose: () => void;
 }
 
+interface UserProfile {
+  first_name: string;
+  last_name: string;
+}
+
 const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose }) => {
   const { data: versions, isLoading } = useQuery({
     queryKey: ['question-versions', questionId],
@@ -41,6 +46,17 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
       return data;
     }
   });
+
+  const getUserName = (profiles: UserProfile | UserProfile[] | null | undefined): string => {
+    if (!profiles) return 'Unknown';
+    
+    if (Array.isArray(profiles)) {
+      if (profiles.length === 0) return 'Unknown';
+      return `${profiles[0].first_name} ${profiles[0].last_name}`;
+    }
+    
+    return `${profiles.first_name} ${profiles.last_name}`;
+  };
 
   if (isLoading) {
     return <div className="text-center py-8">Loading versions...</div>;
@@ -101,17 +117,10 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
                 <Calendar className="h-4 w-4" />
                 <span>{new Date(currentQuestion.updated_at).toLocaleString('th-TH')}</span>
               </div>
-              {currentQuestion.profiles && (
-                <div className="flex items-center space-x-1">
-                  <User className="h-4 w-4" />
-                  <span>
-                    {Array.isArray(currentQuestion.profiles) 
-                      ? `${currentQuestion.profiles[0]?.first_name} ${currentQuestion.profiles[0]?.last_name}`
-                      : `${currentQuestion.profiles.first_name} ${currentQuestion.profiles.last_name}`
-                    }
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center space-x-1">
+                <User className="h-4 w-4" />
+                <span>{getUserName(currentQuestion.profiles)}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -123,7 +132,6 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
         {versions && versions.length > 0 ? (
           versions.map((version) => {
             const questionData = version.question_data as unknown as QuestionData;
-            const profiles = Array.isArray(version.profiles) ? version.profiles[0] : version.profiles;
             
             return (
               <Card key={version.id}>
@@ -165,14 +173,10 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
                       <Calendar className="h-4 w-4" />
                       <span>{new Date(version.created_at).toLocaleString('th-TH')}</span>
                     </div>
-                    {profiles && (
-                      <div className="flex items-center space-x-1">
-                        <User className="h-4 w-4" />
-                        <span>
-                          {profiles.first_name} {profiles.last_name}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-1">
+                      <User className="h-4 w-4" />
+                      <span>{getUserName(version.profiles)}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
