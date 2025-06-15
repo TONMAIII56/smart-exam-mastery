@@ -105,7 +105,10 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
                 <div className="flex items-center space-x-1">
                   <User className="h-4 w-4" />
                   <span>
-                    {currentQuestion.profiles.first_name} {currentQuestion.profiles.last_name}
+                    {Array.isArray(currentQuestion.profiles) 
+                      ? `${currentQuestion.profiles[0]?.first_name} ${currentQuestion.profiles[0]?.last_name}`
+                      : `${currentQuestion.profiles.first_name} ${currentQuestion.profiles.last_name}`
+                    }
                   </span>
                 </div>
               )}
@@ -133,10 +136,10 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-semibold mb-2">Question:</h4>
-                    <p className="text-gray-700">{questionData.question_text}</p>
+                    <p className="text-gray-700">{questionData?.question_text}</p>
                   </div>
                   
-                  {questionData.options && (
+                  {questionData?.options && (
                     <div>
                       <h4 className="font-semibold mb-2">Options:</h4>
                       <div className="space-y-2">
