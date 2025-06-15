@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, User } from 'lucide-react';
+import { QuestionData } from '@/types/admin';
 
 interface QuestionVersionsProps {
   questionId: string;
@@ -117,58 +118,63 @@ const QuestionVersions: React.FC<QuestionVersionsProps> = ({ questionId, onClose
       <div className="space-y-4">
         <h4 className="font-semibold">Previous Versions</h4>
         {versions && versions.length > 0 ? (
-          versions.map((version) => (
-            <Card key={version.id}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Version {version.version_number}</span>
-                  <Badge variant="outline">Archived</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Question:</h4>
-                  <p className="text-gray-700">{version.question_data?.question_text}</p>
-                </div>
-                
-                {version.question_data?.options && (
+          versions.map((version) => {
+            const questionData = version.question_data as unknown as QuestionData;
+            const profiles = Array.isArray(version.profiles) ? version.profiles[0] : version.profiles;
+            
+            return (
+              <Card key={version.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Version {version.version_number}</span>
+                    <Badge variant="outline">Archived</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Options:</h4>
-                    <div className="space-y-2">
-                      {version.question_data.options.map((option: any, index: number) => (
-                        <div
-                          key={index}
-                          className={`p-2 rounded ${
-                            option.is_correct ? 'bg-green-100 border border-green-200' : 'bg-gray-50'
-                          }`}
-                        >
-                          <span className="font-medium">{index + 1}.</span> {option.option_text}
-                          {option.is_correct && (
-                            <Badge className="ml-2 bg-green-100 text-green-800">Correct</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                    <h4 className="font-semibold mb-2">Question:</h4>
+                    <p className="text-gray-700">{questionData.question_text}</p>
                   </div>
-                )}
-
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(version.created_at).toLocaleString('th-TH')}</span>
-                  </div>
-                  {Array.isArray(version.profiles) && version.profiles.length > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <User className="h-4 w-4" />
-                      <span>
-                        {version.profiles[0].first_name} {version.profiles[0].last_name}
-                      </span>
+                  
+                  {questionData.options && (
+                    <div>
+                      <h4 className="font-semibold mb-2">Options:</h4>
+                      <div className="space-y-2">
+                        {questionData.options.map((option: any, index: number) => (
+                          <div
+                            key={index}
+                            className={`p-2 rounded ${
+                              option.is_correct ? 'bg-green-100 border border-green-200' : 'bg-gray-50'
+                            }`}
+                          >
+                            <span className="font-medium">{index + 1}.</span> {option.option_text}
+                            {option.is_correct && (
+                              <Badge className="ml-2 bg-green-100 text-green-800">Correct</Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+
+                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>{new Date(version.created_at).toLocaleString('th-TH')}</span>
+                    </div>
+                    {profiles && (
+                      <div className="flex items-center space-x-1">
+                        <User className="h-4 w-4" />
+                        <span>
+                          {profiles.first_name} {profiles.last_name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         ) : (
           <Card>
             <CardContent className="text-center py-8">

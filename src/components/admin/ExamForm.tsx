@@ -6,12 +6,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { X } from 'lucide-react';
+import { 
+  ExamFormData, 
+  DifficultyLevel, 
+  ExamType, 
+  SubjectType, 
+  ExamStatus,
+  SUBJECT_OPTIONS,
+  DIFFICULTY_OPTIONS,
+  EXAM_TYPE_OPTIONS,
+  STATUS_OPTIONS
+} from '@/types/admin';
 
 interface ExamFormProps {
   exam?: any;
@@ -19,24 +29,20 @@ interface ExamFormProps {
   onCancel: () => void;
 }
 
-type DifficultyLevel = 'easy' | 'medium' | 'hard';
-type ExamType = 'civil-service' | 'toeic' | 'aisa';
-type ExamStatus = 'draft' | 'review' | 'published' | 'archived';
-
 const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ExamFormData>({
     exam_name: '',
     description: '',
-    exam_type: 'civil-service' as ExamType,
-    subject: '',
+    exam_type: 'civil-service',
+    subject: 'general-knowledge',
     time_limit: '',
     passing_score: '',
-    difficulty_level: 'medium' as DifficultyLevel,
+    difficulty_level: 'medium',
     premium_only: false,
     visibility: 'public',
     exam_code: '',
     tags: '',
-    status: 'draft' as ExamStatus
+    status: 'draft'
   });
   const [isLoading, setIsLoading] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -50,7 +56,7 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
         exam_name: exam.exam_name || '',
         description: exam.description || '',
         exam_type: exam.exam_type || 'civil-service',
-        subject: exam.subject || '',
+        subject: exam.subject || 'general-knowledge',
         time_limit: exam.time_limit?.toString() || '',
         passing_score: exam.passing_score?.toString() || '',
         difficulty_level: exam.difficulty_level || 'medium',
@@ -72,16 +78,16 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
       const examData = {
         exam_name: formData.exam_name,
         description: formData.description,
-        exam_type: formData.exam_type,
-        subject: formData.subject,
+        exam_type: formData.exam_type as ExamType,
+        subject: formData.subject as SubjectType,
         time_limit: formData.time_limit ? parseInt(formData.time_limit) : null,
         passing_score: formData.passing_score ? parseInt(formData.passing_score) : null,
-        difficulty_level: formData.difficulty_level,
+        difficulty_level: formData.difficulty_level as DifficultyLevel,
         premium_only: formData.premium_only,
         visibility: formData.visibility,
         exam_code: formData.exam_code,
         tags: tags,
-        status: formData.status,
+        status: formData.status as ExamStatus,
         updated_at: new Date().toISOString(),
         ...(exam ? {} : { created_by: user?.id, created_at: new Date().toISOString() })
       };
@@ -168,30 +174,27 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
                 <SelectValue placeholder="Select exam type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="civil-service">Civil Service</SelectItem>
-                <SelectItem value="toeic">TOEIC</SelectItem>
-                <SelectItem value="aisa">AISA</SelectItem>
+                {EXAM_TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <Label htmlFor="subject">Subject *</Label>
-            <Select value={formData.subject} onValueChange={(value) => setFormData({ ...formData, subject: value })}>
+            <Select value={formData.subject} onValueChange={(value: SubjectType) => setFormData({ ...formData, subject: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select subject" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="general-knowledge">General Knowledge</SelectItem>
-                <SelectItem value="thai-language">Thai Language</SelectItem>
-                <SelectItem value="mathematics">Mathematics</SelectItem>
-                <SelectItem value="english">English</SelectItem>
-                <SelectItem value="listening">Listening</SelectItem>
-                <SelectItem value="reading">Reading</SelectItem>
-                <SelectItem value="grammar">Grammar</SelectItem>
-                <SelectItem value="vocabulary">Vocabulary</SelectItem>
-                <SelectItem value="science">Science</SelectItem>
-                <SelectItem value="general">General</SelectItem>
+                {SUBJECT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -203,9 +206,11 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="easy">Easy</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="hard">Hard</SelectItem>
+                {DIFFICULTY_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -242,10 +247,11 @@ const ExamForm: React.FC<ExamFormProps> = ({ exam, onSuccess, onCancel }) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="review">Review</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

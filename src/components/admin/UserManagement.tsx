@@ -11,12 +11,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Edit, Shield, Crown, User, Calendar, Mail } from 'lucide-react';
+import { UserRole, AdminRole, SubscriptionPlan, SubscriptionStatus } from '@/types/admin';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [subscriptionFilter, setSubscriptionFilter] = useState('all');
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showUserDetail, setShowUserDetail] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -34,11 +35,11 @@ const UserManagement = () => {
       }
 
       if (roleFilter !== 'all') {
-        query = query.eq('role', roleFilter);
+        query = query.eq('role', roleFilter as UserRole);
       }
 
       if (subscriptionFilter !== 'all') {
-        query = query.eq('subscription_plan', subscriptionFilter);
+        query = query.eq('subscription_plan', subscriptionFilter as SubscriptionPlan);
       }
 
       const { data, error } = await query;
@@ -65,7 +66,7 @@ const UserManagement = () => {
   });
 
   const updateUserRole = useMutation({
-    mutationFn: async ({ userId, role, adminRole }: { userId: string; role: string; adminRole?: string }) => {
+    mutationFn: async ({ userId, role, adminRole }: { userId: string; role: UserRole; adminRole?: AdminRole }) => {
       const updateData: any = { role };
       if (adminRole !== undefined) {
         updateData.admin_role = adminRole || null;
@@ -95,7 +96,7 @@ const UserManagement = () => {
   });
 
   const updateSubscription = useMutation({
-    mutationFn: async ({ userId, plan, status }: { userId: string; plan: string; status: string }) => {
+    mutationFn: async ({ userId, plan, status }: { userId: string; plan: SubscriptionPlan; status: SubscriptionStatus }) => {
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -264,8 +265,8 @@ const UserManagement = () => {
                                             role === 'moderator' ? 'moderator' : undefined;
                             updateUserRole.mutate({ 
                               userId: user.id, 
-                              role: role === 'super_admin' || role === 'content_manager' || role === 'moderator' ? 'admin' : role,
-                              adminRole 
+                              role: (role === 'super_admin' || role === 'content_manager' || role === 'moderator' ? 'admin' : role) as UserRole,
+                              adminRole: adminRole as AdminRole
                             });
                           }}
                         >
@@ -283,8 +284,8 @@ const UserManagement = () => {
                           value={user.subscription_plan || 'free'}
                           onValueChange={(plan) => updateSubscription.mutate({ 
                             userId: user.id, 
-                            plan,
-                            status: 'active'
+                            plan: plan as SubscriptionPlan,
+                            status: 'active' as SubscriptionStatus
                           })}
                         >
                           <SelectTrigger className="w-24">
