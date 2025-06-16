@@ -151,6 +151,57 @@ export type Database = {
           },
         ]
       }
+      exam_questions: {
+        Row: {
+          answer: string
+          category: string
+          choices: Json
+          created_at: string | null
+          created_by: string | null
+          difficulty_level:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          explanation: string | null
+          id: string
+          is_active: boolean | null
+          question: string
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          category: string
+          choices: Json
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          explanation?: string | null
+          id?: string
+          is_active?: boolean | null
+          question: string
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          category?: string
+          choices?: Json
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?:
+            | Database["public"]["Enums"]["difficulty_level"]
+            | null
+          explanation?: string | null
+          id?: string
+          is_active?: boolean | null
+          question?: string
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       exam_results: {
         Row: {
           completed_at: string | null
