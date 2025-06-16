@@ -362,6 +362,426 @@ const thaiLanguageExam: ExamData = {
   ]
 };
 
+// ข้อสอบความรู้รอบตัว (การเมืองการปกครอง กฎหมายไทย)
+const generalKnowledgeExam: ExamData = {
+  id: 'general-knowledge-politics-law',
+  title: 'ข้อสอบความรู้รอบตัว (การเมืองการปกครอง กฎหมายไทย)',
+  subject: 'general-knowledge',
+  duration: 60,
+  questions: [
+    {
+      id: 'gk1',
+      text: 'ข้อใดคือหลักการสำคัญของการปกครองระบอบประชาธิปไตย?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'อำนาจอธิปไตยเป็นของปวงชน' },
+        { id: 'b', text: 'ผู้นำมีอำนาจสูงสุด' },
+        { id: 'c', text: 'การตัดสินใจโดยชนชั้นสูง' },
+        { id: 'd', text: 'การสืบทอดอำนาจทางสายเลือด' }
+      ],
+      correctAnswer: 'a',
+      explanation: 'ประชาธิปไตยหมายถึงการปกครองของปวงชน โดยปวงชน เพื่อปวงชน'
+    },
+    {
+      id: 'gk2',
+      text: 'รัฐธรรมนูญแห่งราชอาณาจักรไทยฉบับปัจจุบันคือฉบับปี พ.ศ. ใด?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '2540' },
+        { id: 'b', text: '2550' },
+        { id: 'c', text: '2560' },
+        { id: 'd', text: '2562' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'รัฐธรรมนูญแห่งราชอาณาจักรไทย พุทธศักราช 2560 เป็นฉบับปัจจุบัน'
+    },
+    {
+      id: 'gk3',
+      text: 'องค์กรใดมีหน้าที่ในการพิจารณาคดีความที่เกี่ยวข้องกับการเลือกตั้ง?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'ศาลรัฐธรรมนูญ' },
+        { id: 'b', text: 'ศาลยุติธรรม' },
+        { id: 'c', text: 'ศาลปกครอง' },
+        { id: 'd', text: 'คณะกรรมการการเลือกตั้ง' }
+      ],
+      correctAnswer: 'a',
+      explanation: 'ศาลรัฐธรรมนูญมีอำนาจในการพิจารณาคดีเกี่ยวกับการเลือกตั้ง'
+    },
+    {
+      id: 'gk4',
+      text: 'กฎหมายสูงสุดที่ใช้ในการปกครองประเทศคืออะไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'พระราชบัญญัติ' },
+        { id: 'b', text: 'พระราชกำหนด' },
+        { id: 'c', text: 'รัฐธรรมนูญ' },
+        { id: 'd', text: 'กฎกระทรวง' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'รัฐธรรมนูญเป็นกฎหมายสูงสุดของประเทศ'
+    },
+    {
+      id: 'gk5',
+      text: 'ข้อใดคือหน้าที่หลักของรัฐสภา?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'บริหารราชการแผ่นดิน' },
+        { id: 'b', text: 'พิจารณากฎหมาย' },
+        { id: 'c', text: 'บังคับใช้กฎหมาย' },
+        { id: 'd', text: 'ตัดสินคดีความ' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'รัฐสภามีหน้าที่หลักในการตรากฎหมายและพิจารณากฎหมาย'
+    },
+    {
+      id: 'gk6',
+      text: 'นายกรัฐมนตรีของประเทศไทยมาจากการแต่งตั้งโดยใคร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'ประชาชน' },
+        { id: 'b', text: 'พระมหากษัตริย์' },
+        { id: 'c', text: 'ประธานรัฐสภา' },
+        { id: 'd', text: 'สมาชิกสภาผู้แทนราษฎร' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'พระมหากษัตริย์ทรงแต่งตั้งนายกรัฐมนตรีตามมติของรัฐสภา'
+    },
+    {
+      id: 'gk7',
+      text: 'ข้อใดคือสิทธิขั้นพื้นฐานของประชาชนชาวไทยตามรัฐธรรมนูญ?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'สิทธิในการรับราชการ' },
+        { id: 'b', text: 'สิทธิในการมีอาวุธ' },
+        { id: 'c', text: 'สิทธิในการศึกษา' },
+        { id: 'd', text: 'สิทธิในการไม่เสียภาษี' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'สิทธิในการศึกษาเป็นสิทธิขั้นพื้นฐานที่รัฐต้องจัดให้'
+    },
+    {
+      id: 'gk8',
+      text: 'องค์กรใดมีหน้าที่ในการตรวจสอบการใช้อำนาจรัฐ?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'ศาลยุติธรรม' },
+        { id: 'b', text: 'ศาลปกครอง' },
+        { id: 'c', text: 'คณะกรรมการป้องกันและปราบปรามการทุจริตแห่งชาติ' },
+        { id: 'd', text: 'สำนักงานตำรวจแห่งชาติ' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'ป.ป.ช. มีหน้าที่ตรวจสอบการใช้อำนาจรัฐและป้องกันการทุจริต'
+    },
+    {
+      id: 'gk9',
+      text: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎรใช้ระบบใด?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'ระบบบัญชีรายชื่อ' },
+        { id: 'b', text: 'ระบบเขตเลือกตั้ง' },
+        { id: 'c', text: 'ระบบผสม' },
+        { id: 'd', text: 'ระบบสรรหา' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'ใช้ระบบผสมระหว่างระบบเขตเลือกตั้งและบัญชีรายชื่อ'
+    },
+    {
+      id: 'gk10',
+      text: 'ข้อใดคือหลักการแบ่งแยกอำนาจในการปกครอง?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'นิติบัญญัติ บริหาร ตุลาการ' },
+        { id: 'b', text: 'ส่วนกลาง ส่วนภูมิภาค ส่วนท้องถิ่น' },
+        { id: 'c', text: 'รัฐบาล ฝ่ายค้าน' },
+        { id: 'd', text: 'พรรคการเมือง องค์กรอิสระ' }
+      ],
+      correctAnswer: 'a',
+      explanation: 'หลักแบ่งแยกอำนาจแบ่งเป็น 3 ฝ่าย คือ นิติบัญญัติ บริหาร และตุลาการ'
+    }
+  ]
+};
+
+// ข้อสอบภาษาอังกฤษ
+const englishExam: ExamData = {
+  id: 'english-general',
+  title: 'ข้อสอบภาษาอังกฤษ',
+  subject: 'english',
+  duration: 60,
+  questions: [
+    {
+      id: 'en1',
+      text: 'What is the capital of France?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'London' },
+        { id: 'b', text: 'Berlin' },
+        { id: 'c', text: 'Paris' },
+        { id: 'd', text: 'Rome' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'Paris is the capital city of France.'
+    },
+    {
+      id: 'en2',
+      text: 'Which of the following is a verb?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'Happy' },
+        { id: 'b', text: 'Run' },
+        { id: 'c', text: 'Table' },
+        { id: 'd', text: 'Blue' }
+      ],
+      correctAnswer: 'b',
+      explanation: '"Run" is a verb that shows action.'
+    },
+    {
+      id: 'en3',
+      text: 'Complete the sentence: I ___ a student.',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'am' },
+        { id: 'b', text: 'is' },
+        { id: 'c', text: 'are' },
+        { id: 'd', text: 'be' }
+      ],
+      correctAnswer: 'a',
+      explanation: 'Use "am" with "I" in present tense.'
+    },
+    {
+      id: 'en4',
+      text: 'What is the past tense of "go"?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'Goes' },
+        { id: 'b', text: 'Going' },
+        { id: 'c', text: 'Went' },
+        { id: 'd', text: 'Gone' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'The past tense of "go" is "went".'
+    },
+    {
+      id: 'en5',
+      text: 'Which word means the opposite of "hot"?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'Warm' },
+        { id: 'b', text: 'Cold' },
+        { id: 'c', text: 'Mild' },
+        { id: 'd', text: 'Boiling' }
+      ],
+      correctAnswer: 'b',
+      explanation: '"Cold" is the opposite of "hot".'
+    },
+    {
+      id: 'en6',
+      text: 'Choose the correct spelling:',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'recieve' },
+        { id: 'b', text: 'receive' },
+        { id: 'c', text: 'reiceve' },
+        { id: 'd', text: 'receve' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'The correct spelling is "receive" (i before e except after c).'
+    },
+    {
+      id: 'en7',
+      text: 'What is the plural form of "child"?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'Childs' },
+        { id: 'b', text: 'Children' },
+        { id: 'c', text: 'Childes' },
+        { id: 'd', text: 'Childen' }
+      ],
+      correctAnswer: 'b',
+      explanation: '"Children" is the irregular plural form of "child".'
+    },
+    {
+      id: 'en8',
+      text: 'Which sentence is grammatically correct?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'He go to school.' },
+        { id: 'b', text: 'He goes to school.' },
+        { id: 'c', text: 'He going to school.' },
+        { id: 'd', text: 'He gone to school.' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'Use "goes" for third person singular in present tense.'
+    },
+    {
+      id: 'en9',
+      text: 'What is the synonym of "big"?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'Small' },
+        { id: 'b', text: 'Large' },
+        { id: 'c', text: 'Tiny' },
+        { id: 'd', text: 'Little' }
+      ],
+      correctAnswer: 'b',
+      explanation: '"Large" is a synonym of "big".'
+    },
+    {
+      id: 'en10',
+      text: 'Identify the adjective in the sentence: "The red car is fast."',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: 'The' },
+        { id: 'b', text: 'car' },
+        { id: 'c', text: 'red' },
+        { id: 'd', text: 'fast' }
+      ],
+      correctAnswer: 'c',
+      explanation: '"Red" describes the car, making it an adjective.'
+    }
+  ]
+};
+
+// ข้อสอบคณิตศาสตร์
+const mathExam: ExamData = {
+  id: 'math-general',
+  title: 'ข้อสอบคณิตศาสตร์',
+  subject: 'mathematics',
+  duration: 60,
+  questions: [
+    {
+      id: 'ma1',
+      text: '2 + 2 เท่ากับเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '3' },
+        { id: 'b', text: '4' },
+        { id: 'c', text: '5' },
+        { id: 'd', text: '6' }
+      ],
+      correctAnswer: 'b',
+      explanation: '2 + 2 = 4'
+    },
+    {
+      id: 'ma2',
+      text: '10 - 3 เท่ากับเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '6' },
+        { id: 'b', text: '7' },
+        { id: 'c', text: '8' },
+        { id: 'd', text: '9' }
+      ],
+      correctAnswer: 'b',
+      explanation: '10 - 3 = 7'
+    },
+    {
+      id: 'ma3',
+      text: '5 * 6 เท่ากับเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '25' },
+        { id: 'b', text: '30' },
+        { id: 'c', text: '35' },
+        { id: 'd', text: '40' }
+      ],
+      correctAnswer: 'b',
+      explanation: '5 × 6 = 30'
+    },
+    {
+      id: 'ma4',
+      text: '20 / 4 เท่ากับเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '4' },
+        { id: 'b', text: '5' },
+        { id: 'c', text: '6' },
+        { id: 'd', text: '7' }
+      ],
+      correctAnswer: 'b',
+      explanation: '20 ÷ 4 = 5'
+    },
+    {
+      id: 'ma5',
+      text: 'ถ้า x + 5 = 12 แล้ว x เท่ากับเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '5' },
+        { id: 'b', text: '6' },
+        { id: 'c', text: '7' },
+        { id: 'd', text: '8' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'x + 5 = 12, ดังนั้น x = 12 - 5 = 7'
+    },
+    {
+      id: 'ma6',
+      text: 'พื้นที่ของสี่เหลี่ยมจัตุรัสที่มีด้านยาว 7 หน่วยคือเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '14' },
+        { id: 'b', text: '28' },
+        { id: 'c', text: '49' },
+        { id: 'd', text: '35' }
+      ],
+      correctAnswer: 'c',
+      explanation: 'พื้นที่สี่เหลี่ยมจัตุรัส = ด้าน × ด้าน = 7 × 7 = 49'
+    },
+    {
+      id: 'ma7',
+      text: 'มุมฉากมีกี่องศา?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '45' },
+        { id: 'b', text: '90' },
+        { id: 'c', text: '180' },
+        { id: 'd', text: '360' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'มุมฉากมี 90 องศา'
+    },
+    {
+      id: 'ma8',
+      text: 'ค่าเฉลี่ยของ 1, 2, 3, 4, 5 คือเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '2' },
+        { id: 'b', text: '3' },
+        { id: 'c', text: '4' },
+        { id: 'd', text: '5' }
+      ],
+      correctAnswer: 'b',
+      explanation: 'ค่าเฉลี่ย = (1+2+3+4+5) ÷ 5 = 15 ÷ 5 = 3'
+    },
+    {
+      id: 'ma9',
+      text: 'ถ้ามีเงิน 100 บาท ซื้อขนมไป 25 บาท จะเหลือเงินเท่าไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '65' },
+        { id: 'b', text: '70' },
+        { id: 'c', text: '75' },
+        { id: 'd', text: '80' }
+      ],
+      correctAnswer: 'c',
+      explanation: '100 - 25 = 75 บาท'
+    },
+    {
+      id: 'ma10',
+      text: 'จำนวนเฉพาะที่น้อยที่สุดคืออะไร?',
+      type: 'multiple_choice',
+      options: [
+        { id: 'a', text: '0' },
+        { id: 'b', text: '1' },
+        { id: 'c', text: '2' },
+        { id: 'd', text: '3' }
+      ],
+      correctAnswer: 'c',
+      explanation: '2 เป็นจำนวนเฉพาะที่น้อยที่สุด'
+    }
+  ]
+};
+
 // Mock data สำหรับข้อสอบราชการ - ภาษาไทย
 const civilServiceThaiMock: ExamData = {
   id: 'civil-thai',
@@ -537,12 +957,17 @@ const Quiz: React.FC = () => {
     // จำลองการโหลดข้อมูล
     setTimeout(() => {
       if (exam === 'civil-service' && subject === 'thai-language') {
-        // ใช้ข้อสอบภาษาไทยชุดใหม่
         setExamData(thaiLanguageExam);
         setTimeLeft(thaiLanguageExam.duration * 60);
       } else if (exam === 'civil-service' && subject === 'general-knowledge') {
-        setExamData(generalKnowledgeMock);
-        setTimeLeft(generalKnowledgeMock.duration * 60);
+        setExamData(generalKnowledgeExam);
+        setTimeLeft(generalKnowledgeExam.duration * 60);
+      } else if (exam === 'civil-service' && subject === 'english') {
+        setExamData(englishExam);
+        setTimeLeft(englishExam.duration * 60);
+      } else if (exam === 'civil-service' && subject === 'mathematics') {
+        setExamData(mathExam);
+        setTimeLeft(mathExam.duration * 60);
       } else if (exam === 'toeic' && subject === 'listening') {
         setExamData(toeicListeningMock);
         setTimeLeft(toeicListeningMock.duration * 60);
