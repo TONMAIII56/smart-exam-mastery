@@ -1,15 +1,17 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, BookOpen, Users, Star, Play, Target, Trophy, Zap } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ArrowLeft, Clock, BookOpen, Users, Star, Play, Target, Trophy, Zap, Upload } from 'lucide-react';
+import { FileUploadQuiz } from '@/components/quiz/FileUploadQuiz';
 
 const QuizSelection = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const examType = searchParams.get('type') || 'civil-service';
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
@@ -181,6 +183,12 @@ const QuizSelection = () => {
     navigate(`/quiz?exam=${examType}&subject=${subjectId}`);
   };
 
+  const handleQuizCreated = (quizData: any) => {
+    setUploadDialogOpen(false);
+    // Navigate to the created quiz
+    navigate(`/quiz?exam=${examType}&subject=${quizData.questions[0]?.category}&custom=true`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
       {/* Header */}
@@ -203,10 +211,26 @@ const QuizSelection = () => {
                 <p className="text-yellow-100 text-sm lg:text-base mt-1">{currentExam.subtitle}</p>
               </div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-white">
-              <div className="text-sm text-yellow-100">ข้อสอบทั้งหมด</div>
-              <div className="text-2xl font-bold">
-                {currentExam.subjects.reduce((sum, subject) => sum + subject.questions, 0)} ข้อ
+            <div className="flex items-center space-x-4">
+              <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30">
+                    <Upload className="h-4 w-4 mr-2" />
+                    อัพโหลดไฟล์
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>สร้างข้อสอบจากไฟล์</DialogTitle>
+                  </DialogHeader>
+                  <FileUploadQuiz onQuizCreated={handleQuizCreated} />
+                </DialogContent>
+              </Dialog>
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-white">
+                <div className="text-sm text-yellow-100">ข้อสอบทั้งหมด</div>
+                <div className="text-2xl font-bold">
+                  {currentExam.subjects.reduce((sum, subject) => sum + subject.questions, 0)} ข้อ
+                </div>
               </div>
             </div>
           </div>
