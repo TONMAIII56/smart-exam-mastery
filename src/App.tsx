@@ -6,10 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import LandingPage from "./pages/LandingPage";
+import LiquidGlassLanding from "./pages/LiquidGlassLanding";
 import Index from "./pages/Index";
 import QuizSelection from "./pages/QuizSelection";
 import ExamSelection from "./pages/ExamSelection";
 import Quiz from "./pages/Quiz";
+import QuizPage from "./pages/QuizPage";
 import Exam from "./pages/Exam";
 import QuizResults from "./pages/QuizResults";
 import Subscription from "./pages/Subscription";
@@ -26,11 +28,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<LiquidGlassLanding />} />
+            <Route path="/original-landing" element={<LandingPage />} />
             <Route path="/dashboard" element={<Index />} />
             <Route path="/quiz-selection" element={<QuizSelection />} />
             <Route path="/exam-selection" element={<ExamSelection />} />
             <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz-page" element={<QuizPage />} />
             <Route path="/exam/:id" element={<Exam />} />
             <Route path="/quiz-results" element={<QuizResults />} />
             <Route path="/subscription" element={<Subscription />} />

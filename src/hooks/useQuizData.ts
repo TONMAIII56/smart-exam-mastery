@@ -38,7 +38,7 @@ export function useQuizData(category: string = 'mathematics', limit: number = 20
       return data?.map(q => ({
         id: q.id,
         question: q.question,
-        choices: Array.isArray(q.choices) ? q.choices : [],
+        choices: Array.isArray(q.choices) ? q.choices as string[] : [],
         answer: q.answer,
         explanation: q.explanation || undefined,
         category: q.category,
