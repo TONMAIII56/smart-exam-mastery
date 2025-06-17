@@ -7,112 +7,131 @@ import { useNavigate } from 'react-router-dom';
 export const LiquidGlassHero: React.FC = () => {
   const navigate = useNavigate();
 
-  const startFreeTrial = () => {
+  const startPreTest = () => {
     navigate('/quiz-selection');
   };
 
+  const goToSubscription = () => {
+    navigate('/subscription');
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background blobs */}
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Animated background effects with golden theme */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-cyan-400/30 to-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-80 h-80 bg-gradient-to-r from-purple-400/30 to-pink-500/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-72 h-72 bg-gradient-to-r from-emerald-400/30 to-cyan-500/30 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-yellow-400/30 to-orange-500/30 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-yellow-400/20 to-amber-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-amber-400/15 to-yellow-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-yellow-300/5 to-amber-400/5 rounded-full blur-3xl animate-spin-slow"></div>
       </div>
 
-      {/* Glass morphism container */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          {/* Floating badge */}
-          <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full px-8 py-4 mb-12 shadow-2xl">
-            <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
-            <Target className="h-5 w-5 text-cyan-400" />
-            <span className="text-white font-semibold tracking-wide">2,500+ ผู้สอบผ่าน ก.พ. แล้ว</span>
-            <Sparkles className="h-5 w-5 text-yellow-400" />
-          </div>
+      {/* Floating particles */}
+      <div className="absolute inset-0">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`
+            }}
+          />
+        ))}
+      </div>
 
-          {/* Main headline with gradient text */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
-            <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
-              สอบ ก.พ. ผ่าน
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-lg border border-yellow-400/30 rounded-full px-6 py-3 mb-8">
+            <Sparkles className="h-5 w-5 text-yellow-400 animate-pulse" />
+            <span className="text-yellow-300 font-medium">
+              ระบบเตรียมสอบอัจฉริยะ รุ่นใหม่ล่าสุด
             </span>
-            <span className="block text-white/90">
-              ใน 60 วัน
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+            <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+              เตรียมสอบ
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 bg-clip-text text-transparent animate-gradient">
+              อย่างเซียน
             </span>
           </h1>
+          
+          <p className="text-xl md:text-2xl text-white/70 max-w-4xl mx-auto leading-relaxed mb-12">
+            ระบบ AI วิเคราะห์จุดอ่อน สร้างแผนการเรียนเฉพาะคุณ 
+            พร้อมเทคนิคเฉพาะทางที่ช่วยให้คุณ
+            <span className="text-yellow-400 font-semibold"> สอบผ่านแน่นอน</span>
+          </p>
+        </div>
 
-          {/* Subtitle with glass effect */}
-          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 mb-12 shadow-2xl max-w-4xl mx-auto">
-            <p className="text-xl md:text-2xl text-white/80 leading-relaxed">
-              ระบบ AI วิเคราะห์จุดอ่อน + เทคนิคจำเร็ว
-              <br />
-              <span className="text-cyan-300 font-semibold">สร้างผลลัพธ์จริงภายใน 2 เดือน</span>
-            </p>
+        {/* Statistics */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-12">
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl px-6 py-4">
+            <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">95%</div>
+            <div className="text-white/60">อัตราผ่านการสอบ</div>
           </div>
-
-          {/* Feature cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {[
-              { icon: "🎯", title: "AI วิเคราะห์", desc: "จุดอ่อนเฉพาะบุคคล" },
-              { icon: "📚", title: "เนื้อหาครบ", desc: "ทุกหมวดของ ก.พ." },
-              { icon: "⚡", title: "เทคนิคจำเร็ว", desc: "สอบผ่านรอบเดียว" },
-              { icon: "📊", title: "ระบบอัจฉริยะ", desc: "วัดผลแบบเรียลไทม์" }
-            ].map((feature, index) => (
-              <div key={index} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-3xl mb-3">{feature.icon}</div>
-                <h3 className="text-white font-bold text-lg mb-2">{feature.title}</h3>
-                <p className="text-white/70 text-sm">{feature.desc}</p>
-              </div>
-            ))}
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl px-6 py-4">
+            <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">50K+</div>
+            <div className="text-white/60">ผู้ใช้ทั่วประเทศ</div>
           </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <Button
-              onClick={startFreeTrial}
-              size="lg"
-              className="relative bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-6 px-12 rounded-2xl text-xl shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 transform hover:-translate-y-2 border border-cyan-400/30"
-            >
-              <Zap className="mr-3 h-7 w-7" />
-              เริ่มทดลองฟรี 7 วัน
-              <div className="absolute inset-0 bg-white/20 rounded-2xl blur opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              className="bg-white/5 backdrop-blur-lg border-2 border-white/20 text-white hover:bg-white/10 py-6 px-12 rounded-2xl font-semibold text-xl transition-all duration-300 hover:scale-105"
-            >
-              ดูแผนการเรียน
-              <ArrowRight className="ml-3 h-7 w-7" />
-            </Button>
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl px-6 py-4">
+            <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">5K+</div>
+            <div className="text-white/60">ข้อสอบจริง</div>
           </div>
+        </div>
 
-          {/* Stats with liquid glass effect */}
-          <div className="bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-2xl max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-cyan-400 mb-2">97%</div>
-                <div className="text-white/70">อัตราผ่าน</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-400 mb-2">60</div>
-                <div className="text-white/70">วันเฉลี่ย</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-purple-400 mb-2">2,500+</div>
-                <div className="text-white/70">ผู้ใช้งาน</div>
-              </div>
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+          <Button
+            onClick={startPreTest}
+            size="lg"
+            className="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-6 px-12 rounded-2xl text-xl shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 transform hover:-translate-y-1 group animate-glow"
+          >
+            <Target className="mr-3 h-6 w-6 group-hover:animate-pulse" />
+            ทดสอบความพร้อมฟรี
+            <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          
+          <Button
+            onClick={goToSubscription}
+            variant="outline"
+            size="lg"
+            className="bg-white/5 backdrop-blur-lg border-2 border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 font-bold py-6 px-8 rounded-2xl text-xl transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <Zap className="mr-2 h-5 w-5" />
+            ดูแผน Premium
+          </Button>
+        </div>
+
+        {/* Feature highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+            <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-xl flex items-center justify-center mb-4 mx-auto">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
+            <h3 className="text-lg font-semibold text-white mb-2">AI วิเคราะห์ส่วนบุคคล</h3>
+            <p className="text-white/60 text-sm">ระบบ AI วิเคราะห์จุดอ่อนและสร้างแผนการเรียนเฉพาะคุณ</p>
+          </div>
+          
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+            <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center mb-4 mx-auto">
+              <Target className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">ข้อสอบจริง 5 ปี</h3>
+            <p className="text-white/60 text-sm">ข้อสอบย้อนหลัง 5 ปี พร้อมเฉลยละเอียด</p>
+          </div>
+          
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+            <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-xl flex items-center justify-center mb-4 mx-auto">
+              <Zap className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">รับประกันผลลัพธ์</h3>
+            <p className="text-white/60 text-sm">สอบไม่ผ่านคืนเงิน 100% ภายใน 30 วัน</p>
           </div>
         </div>
       </div>
-
-      {/* Floating elements */}
-      <div className="absolute top-1/4 left-10 w-4 h-4 bg-cyan-400 rounded-full animate-bounce delay-1000"></div>
-      <div className="absolute top-1/3 right-10 w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-2000"></div>
-      <div className="absolute bottom-1/4 left-1/4 w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-500"></div>
     </section>
   );
 };

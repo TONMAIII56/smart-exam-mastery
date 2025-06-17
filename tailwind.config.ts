@@ -25,13 +25,16 @@ export default {
 				'sans': ['Prompt', 'Inter', 'sans-serif'],
 			},
 			colors: {
-				// Skooldio-inspired color palette
+				// Skooldio-inspired color palette with yellow/golden theme
 				'skooldio': {
-					'orange': '#FF5800',
+					'orange': '#FFB800', // Changed to golden yellow
 					'dark-blue': '#1E2A78',
 					'green': '#10B981',
 					'purple': '#7E22CE',
 					'blue': '#3B82F6',
+					'gold': '#FFD700',
+					'amber': '#F59E0B',
+					'yellow': '#FCD34D',
 				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -39,7 +42,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#FF5800',
+					DEFAULT: '#FFB800', // Changed to golden yellow
 					foreground: '#FFFFFF'
 				},
 				secondary: {
@@ -128,6 +131,14 @@ export default {
 						'background-size': '200% 200%',
 						'background-position': 'right center'
 					}
+				},
+				'glow': {
+					'0%, 100%': {
+						'box-shadow': '0 0 20px rgba(255, 184, 0, 0.3)'
+					},
+					'50%': {
+						'box-shadow': '0 0 40px rgba(255, 215, 0, 0.6)'
+					}
 				}
 			},
 			animation: {
@@ -135,7 +146,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'gradient': 'gradient 6s ease infinite'
+				'gradient': 'gradient 6s ease infinite',
+				'glow': 'glow 2s ease-in-out infinite'
 			}
 		}
 	},

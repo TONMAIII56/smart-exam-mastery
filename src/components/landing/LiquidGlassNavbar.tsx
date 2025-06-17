@@ -25,23 +25,23 @@ export const LiquidGlassNavbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
               Smart Exam Mastery
             </h1>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <button className="text-white/80 hover:text-cyan-400 transition-colors duration-200 font-medium">
+            <button className="text-white/80 hover:text-yellow-400 transition-colors duration-200 font-medium">
               หน้าหลัก
             </button>
-            <button className="text-white/80 hover:text-cyan-400 transition-colors duration-200 font-medium">
+            <button className="text-white/80 hover:text-yellow-400 transition-colors duration-200 font-medium">
               คุณสมบัติ
             </button>
-            <button className="text-white/80 hover:text-cyan-400 transition-colors duration-200 font-medium">
+            <button className="text-white/80 hover:text-yellow-400 transition-colors duration-200 font-medium">
               แผนการเรียน
             </button>
-            <button className="text-white/80 hover:text-cyan-400 transition-colors duration-200 font-medium">
+            <button className="text-white/80 hover:text-yellow-400 transition-colors duration-200 font-medium">
               เสียงผู้ใช้
             </button>
             
@@ -55,7 +55,7 @@ export const LiquidGlassNavbar: React.FC = () => {
               </Button>
               <Button 
                 onClick={startPreTest}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                className="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white rounded-xl shadow-lg hover:shadow-yellow-500/25 transition-all duration-300"
               >
                 ทดลองฟรี
               </Button>
@@ -66,7 +66,7 @@ export const LiquidGlassNavbar: React.FC = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="text-white/80 hover:text-cyan-400 transition-colors duration-200"
+              className="text-white/80 hover:text-yellow-400 transition-colors duration-200"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -77,16 +77,16 @@ export const LiquidGlassNavbar: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-white/10 backdrop-blur-lg border-t border-white/20 rounded-b-2xl shadow-2xl">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
+              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-yellow-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
                 หน้าหลัก
               </button>
-              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
+              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-yellow-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
                 คุณสมบัติ
               </button>
-              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
+              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-yellow-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
                 แผนการเรียน
               </button>
-              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
+              <button className="block w-full text-left px-3 py-3 text-white/80 hover:text-yellow-400 hover:bg-white/10 rounded-lg transition-colors duration-200 font-medium">
                 เสียงผู้ใช้
               </button>
               
@@ -99,7 +99,7 @@ export const LiquidGlassNavbar: React.FC = () => {
                   เข้าสู่ระบบ
                 </Button>
                 <Button 
-                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg" 
+                  className="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white rounded-lg" 
                   onClick={startPreTest}
                 >
                   ทดลองฟรี
